@@ -1,0 +1,14 @@
+# Build output (arduino-cli builds in a temp dir by default, but just in case)
+build/
+*.hex
+*.elf
+*.bin
+
+# Keep the folder scaffold even when a dir's contents are ignored
+!libraries/.gitkeep
+!docs/.gitkeep
+
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+.vscode/
