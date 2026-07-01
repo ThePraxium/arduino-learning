@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Project 30 - DHT11 Temperature &amp; Humidity Sensor</title>
+<style>
+  /* ============================================================
+     DAYLIGHT CLASSROOM - shared design system (matches Projects 4 & 5)
+     Portrait bench orientation: Mega left (USB up), breadboard right,
+     column 1 at the top-left. Plus a live serial-monitor pane + a
+     code-follower that highlights the line running on the board.
+     ============================================================ */
+  :root {
+    --step--1: clamp(0.83rem, 0.78rem + 0.2vw, 0.9rem);
+    --step-0:  clamp(1rem, 0.95rem + 0.25vw, 1.08rem);
+    --step-1:  clamp(1.2rem, 1.1rem + 0.5vw, 1.4rem);
+    --step-2:  clamp(1.5rem, 1.3rem + 0.9vw, 1.85rem);
+    --step-3:  clamp(1.95rem, 1.6rem + 1.6vw, 2.6rem);
+    --step-4:  clamp(2.4rem, 1.9rem + 2.4vw, 3.4rem);
+
+    --sp-1: 0.4rem; --sp-2: 0.8rem; --sp-3: 1.2rem;
+    --sp-4: 1.8rem; --sp-5: 2.6rem; --sp-6: 4rem;
+
+    --cream:#fbf7ee; --cream-2:#f4ecdb; --paper:#ffffff;
+    --ink:#2c2a26; --ink-soft:#5b574e; --ink-faint:#8c867a;
+    --line:#e7ddc7; --line-2:#d9cdb0;
+
+    --go:#2faa55; --go-d:#1f7d3e; --slow:#f1b500; --slow-d:#b98700;
+    --stop:#e0473b; --stop-d:#b22f24;
+    --accent:#d98324; --accent-d:#b56712; --sky:#2f7fb0;
+    --tan:#c9a36b; --tan-d:#9c7a44;
+
+    --c1:#e0473b; --c1d:#b22f24; --c2:#e8821e; --c2d:#b5640f;
+    --c3:#f1b500; --c3d:#b98700; --c4:#2faa55; --c4d:#1f7d3e;
+    --c5:#2f8fc0; --c5d:#1f6c95; --c6:#7a5cc8; --c6d:#5a3fa0;
+
+    --shadow-sm:0 1px 2px rgba(75,60,30,.06),0 2px 8px rgba(75,60,30,.06);
+    --shadow:0 4px 14px rgba(75,60,30,.10),0 10px 30px rgba(75,60,30,.07);
+    --shadow-lg:0 10px 30px rgba(75,60,30,.14),0 24px 60px rgba(75,60,30,.10);
+
+    --radius:20px; --radius-sm:12px; --radius-lg:28px;
+    --measure:66ch; --nav-w:256px;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:84px; }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+  }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fff7e6 0%, transparent 55%),
+      radial-gradient(900px 500px at -10% 10%, #f3fbef 0%, transparent 50%),
+      var(--cream);
+    color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    font-size:var(--step-0); line-height:1.65;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  h1,h2,h3,h4{line-height:1.15;letter-spacing:-0.01em;color:var(--ink);margin:0 0 var(--sp-2);}
+  h2{font-size:var(--step-3);} h3{font-size:var(--step-1);}
+  p{margin:0 0 var(--sp-3);max-width:var(--measure);}
+  a{color:var(--accent-d);}
+  code,kbd,pre{font-family:"Cascadia Code","Consolas","SFMono-Regular",ui-monospace,monospace;}
+  :focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:6px;}
+  .skip-link{position:absolute;left:-999px;top:0;z-index:999;background:var(--ink);color:#fff;padding:.6rem 1rem;border-radius:0 0 10px 0;}
+  .skip-link:focus{left:0;}
+
+  .shell{display:flex;align-items:flex-start;max-width:1320px;margin:0 auto;}
+
+  /* side nav */
+  .sidenav{position:sticky;top:0;align-self:flex-start;width:var(--nav-w);flex:0 0 var(--nav-w);height:100vh;overflow-y:auto;padding:var(--sp-4) var(--sp-3) var(--sp-4) var(--sp-4);}
+  .brand{display:flex;align-items:center;gap:.6rem;margin-bottom:var(--sp-4);}
+  .brand .dots{display:inline-flex;gap:4px;padding:6px;background:#36322b;border-radius:9px;box-shadow:var(--shadow-sm);}
+  .brand .dots i{width:9px;height:9px;border-radius:50%;display:block;}
+  .brand .dots i.c1{background:var(--c1);} .brand .dots i.c2{background:var(--c3);}
+  .brand .dots i.c3{background:var(--c4);} .brand .dots i.c4{background:var(--c5);}
+  .brand b{font-size:var(--step--1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;}
+  .brand span{font-size:var(--step-0);font-weight:700;color:var(--ink);}
+  .nav-progress{font-size:var(--step--1);color:var(--ink-faint);margin:0 0 var(--sp-2) 4px;font-variant-numeric:tabular-nums;}
+  .navlist{list-style:none;margin:0;padding:0;position:relative;}
+  .navlist::before{content:"";position:absolute;left:21px;top:18px;bottom:18px;width:3px;background:var(--line-2);border-radius:3px;z-index:0;}
+  .navlist .nav-fill{content:"";position:absolute;left:21px;top:18px;width:3px;height:0;background:linear-gradient(180deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c6));border-radius:3px;z-index:0;transition:height .35s cubic-bezier(.4,0,.2,1);}
+  .navlist a{position:relative;z-index:1;display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;border-radius:12px;color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:var(--step--1);transition:background .15s,color .15s,transform .15s;}
+  .navlist a .num{flex:0 0 1.7rem;height:1.7rem;display:grid;place-items:center;border-radius:50%;background:var(--cream);color:var(--ink-faint);font-size:.78rem;font-weight:800;border:3px solid var(--line-2);transition:inherit;}
+  .navlist a:hover{background:var(--paper);color:var(--ink);box-shadow:var(--shadow-sm);}
+  .navlist a:hover .num{border-color:var(--accent);}
+  .navlist a.active{color:var(--ink);}
+  .navlist a.active .num{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.08);box-shadow:0 0 0 5px #fdecdf;}
+  .navlist a.done .num{background:var(--go);color:#fff;border-color:var(--go);}
+
+  main{flex:1 1 auto;min-width:0;padding:0 clamp(1rem,4vw,3.5rem) var(--sp-6);}
+  .topbar{display:none;}
+  section{scroll-margin-top:84px;padding:var(--sp-5) 0;border-top:1px dashed var(--line-2);}
+  section:first-of-type{border-top:0;}
+  .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:var(--step--1);font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-d);margin-bottom:var(--sp-2);}
+  .eyebrow::before{content:"";width:26px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4),var(--c6));}
+  .lead{font-size:var(--step-1);color:var(--ink-soft);max-width:58ch;}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--sp-4);}
+  .card + .card{margin-top:var(--sp-3);}
+  .grid{display:grid;gap:var(--sp-3);}
+  .grid.cols-2{grid-template-columns:repeat(2,1fr);}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr);}
+
+  .hero{position:relative;overflow:hidden;background:radial-gradient(600px 300px at 90% 0%,#fff3da,transparent 60%),linear-gradient(180deg,#ffffff,#fffaf0);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:clamp(1.6rem,4vw,3rem);margin-top:var(--sp-4);}
+  .hero h1{font-size:var(--step-4);margin-bottom:var(--sp-2);background:linear-gradient(115deg,var(--ink) 30%,var(--accent-d));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero .lead{font-size:var(--step-1);margin-bottom:var(--sp-3);}
+  .hero-badges{display:flex;flex-wrap:wrap;gap:.6rem;}
+  .badge{display:inline-flex;align-items:center;gap:.45rem;background:var(--cream);border:1px solid var(--line-2);padding:.4rem .8rem;border-radius:999px;font-size:var(--step--1);font-weight:700;color:var(--ink-soft);}
+  .badge .swatch{width:11px;height:11px;border-radius:50%;}
+  .hero-motif{position:absolute;right:clamp(1rem,4vw,2.4rem);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;background:#36322b;box-shadow:var(--shadow-lg),inset 0 0 0 3px #4a443a;}
+  .hero-motif .mtherm{position:relative;width:16px;height:50px;border-radius:8px;background:#1d1b17;box-shadow:inset 0 2px 5px rgba(0,0,0,.6);overflow:hidden;}
+  .hero-motif .mtherm::after{content:"";position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(180deg,var(--stop),#ff8a5b);transition:height .9s ease;}
+  .hero-motif .mtherm.on::after{height:72%;}
+  .hero-motif .mdrop{width:22px;height:28px;background:#1d1b17;box-shadow:inset 0 2px 5px rgba(0,0,0,.6);border-radius:50% 50% 50% 50% / 70% 70% 30% 30%;transition:background .9s ease,box-shadow .9s ease;}
+  .hero-motif .mdrop.on{background:radial-gradient(circle at 38% 32%,#bfe6ff,var(--c5));box-shadow:0 0 14px 3px rgba(47,143,192,.6);}
+  @media (max-width:820px){.hero-motif{display:none;}}
+
+  /* progress bar */
+  .progress-wrap{position:sticky;top:0;z-index:30;background:rgba(251,247,238,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:.55rem clamp(1rem,4vw,3.5rem);margin:0 calc(-1 * clamp(1rem,4vw,3.5rem));}
+  .progress-track{--pct:0%;display:flex;align-items:center;gap:.6rem;max-width:1100px;margin:0 auto;}
+  .progress-bar{position:relative;flex:1 1 auto;height:8px;background:var(--cream-2);border-radius:99px;overflow:hidden;}
+  .progress-bar::after{content:"";position:absolute;inset:0;width:var(--pct);background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c6));border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .progress-label{font-size:var(--step--1);font-weight:700;color:var(--ink-soft);white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+  /* parts */
+  .parts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp-2);margin:0;padding:0;list-style:none;}
+  .part{display:flex;gap:.7rem;align-items:center;background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.7rem .8rem;}
+  .part .pico{flex:0 0 38px;height:38px;display:grid;place-items:center;}
+  .part .pname{font-weight:700;font-size:var(--step--1);line-height:1.25;}
+  .part .pqty{display:block;font-size:.72rem;color:var(--ink-faint);font-weight:700;letter-spacing:.03em;}
+
+  .learn-list{list-style:none;margin:0;padding:0;display:grid;gap:var(--sp-2);}
+  .learn-list li{display:flex;gap:.9rem;align-items:flex-start;padding:.9rem 1rem;border-radius:var(--radius-sm);background:var(--cream);border:1px solid var(--line);}
+  .learn-list .k{flex:0 0 2.1rem;height:2.1rem;border-radius:10px;display:grid;place-items:center;font-weight:900;color:#fff;box-shadow:var(--shadow-sm);}
+  .learn-list li:nth-child(1) .k{background:var(--c4);}
+  .learn-list li:nth-child(2) .k{background:var(--c5);}
+  .learn-list li:nth-child(3) .k{background:var(--c6);}
+  .learn-list b{display:block;} .learn-list p{margin:.15rem 0 0;color:var(--ink-soft);font-size:var(--step--1);}
+
+  .callout{display:flex;gap:1rem;align-items:flex-start;background:linear-gradient(180deg,#f1fbf1,#ffffff);border:1px solid #cfe9cf;border-left:5px solid var(--go);border-radius:var(--radius-sm);padding:var(--sp-3) var(--sp-4);}
+  .callout.amber{background:linear-gradient(180deg,#fff6e6,#fff);border-color:#f3dca8;border-left-color:var(--accent);}
+  .callout.sky{background:linear-gradient(180deg,#eef6fb,#fff);border-color:#cfe0ee;border-left-color:var(--sky);}
+  .callout .ic{flex:0 0 auto;font-size:1.6rem;line-height:1;}
+  .callout p:last-child{margin-bottom:0;}
+
+  /* ---------- wiring (portrait diagram + steps) ---------- */
+  .wiring-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);align-items:start;}
+  @media (max-width:1080px){.wiring-grid{grid-template-columns:1fr;}}
+  .diagram-card{padding:var(--sp-3);position:sticky;top:70px;}
+  @media (max-width:1080px){.diagram-card{position:static;}}
+  .diagram-card svg{width:100%;height:auto;display:block;border-radius:var(--radius-sm);}
+  .step-callout{margin-top:var(--sp-2);padding:.7rem .9rem;background:#fff6e6;border:1px solid #f3dca8;border-radius:12px;font-size:var(--step--1);font-weight:700;color:#8a5a16;display:flex;gap:.5rem;align-items:center;min-height:2.4rem;}
+  .step-controls{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-top:var(--sp-3);}
+  .btn{font:inherit;font-weight:700;cursor:pointer;border:1px solid var(--line-2);background:var(--paper);color:var(--ink);padding:.6rem 1.1rem;border-radius:12px;box-shadow:var(--shadow-sm);transition:transform .12s,box-shadow .12s,background .12s;display:inline-flex;align-items:center;gap:.5rem;}
+  .btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--shadow);}
+  .btn:active:not(:disabled){transform:translateY(0);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .btn.primary{background:var(--accent);border-color:var(--accent-d);color:#fff;}
+  .btn.primary:hover:not(:disabled){background:var(--accent-d);}
+  .step-dots{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;}
+  .step-dots button{width:12px;height:12px;border-radius:50%;border:1px solid var(--line-2);background:var(--cream-2);padding:0;cursor:pointer;}
+  .step-dots button[aria-current="true"]{background:var(--accent);border-color:var(--accent-d);transform:scale(1.2);}
+  .steps-panel{display:grid;gap:var(--sp-2);}
+  .step-card{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);box-shadow:var(--shadow-sm);overflow:hidden;transition:box-shadow .2s,border-color .2s,transform .2s;}
+  .step-card.is-active{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px);}
+  .step-card.is-active .step-head{background:linear-gradient(180deg,#fff7e9,#fff);}
+  .step-head{width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;gap:.9rem;padding:.9rem 1.1rem;background:var(--paper);border:0;font:inherit;}
+  .step-head .badge-step{flex:0 0 2.4rem;height:2.4rem;border-radius:12px;display:grid;place-items:center;font-weight:900;color:#fff;background:var(--ink);box-shadow:var(--shadow-sm);}
+  .step-card[data-color="ground"] .badge-step{background:#36322b;}
+  .step-card[data-color="c1"] .badge-step{background:var(--c1);}
+  .step-card[data-color="c2"] .badge-step{background:var(--c2);}
+  .step-card[data-color="c3"] .badge-step{background:var(--c3);color:#6b4e00;}
+  .step-card[data-color="c4"] .badge-step{background:var(--c4);}
+  .step-card[data-color="c5"] .badge-step{background:var(--c5);}
+  .step-card[data-color="c6"] .badge-step{background:var(--c6);}
+  .step-head .step-title{font-weight:800;font-size:var(--step-0);}
+  .step-head .step-sub{display:block;font-weight:600;font-size:var(--step--1);color:var(--ink-faint);}
+  .step-head .chev{margin-left:auto;transition:transform .2s;color:var(--ink-faint);}
+  .step-card.is-active .chev{transform:rotate(90deg);}
+  .step-body{padding:0 1.1rem;max-height:0;overflow:hidden;transition:max-height .35s,padding .35s;}
+  .step-card.is-active .step-body{padding:0 1.1rem 1.1rem;max-height:760px;}
+  .step-body ol{margin:0;padding-left:1.2rem;} .step-body li{margin:.3rem 0;}
+  .step-body li b{color:var(--ink);}
+  .scaffold{font-size:var(--step--1);color:var(--ink-soft);margin:0 0 .2rem;padding-bottom:.6rem;}
+  .pin-pill,.col-pill{display:inline-block;font-weight:800;font-size:.82em;padding:.05em .5em;border-radius:7px;border:1px solid var(--line-2);background:var(--cream-2);white-space:nowrap;}
+  .col-pill{background:#eef4fa;border-color:#cfe0ee;color:var(--sky);}
+  .reuse-note{margin:.7rem 0 0;padding:.55rem .8rem;background:#eef4fa;border:1px solid #cfe0ee;border-radius:10px;font-size:var(--step--1);color:#316b94;}
+  .reuse-note b{color:#245374;}
+  .win-chip{display:inline-flex;align-items:center;gap:.45rem;margin:.7rem 0 0;padding:.5rem .8rem;background:#f1fbf1;border:1px solid #cfe9cf;border-radius:999px;font-size:var(--step--1);font-weight:700;color:var(--go-d);}
+  .legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px dashed var(--line);}
+  .legend span{display:inline-flex;align-items:center;gap:.4rem;font-size:var(--step--1);color:var(--ink-soft);font-weight:600;}
+  .legend .ln{width:22px;height:6px;border-radius:4px;} .legend .sq{width:13px;height:13px;border-radius:3px;}
+
+  /* ---------- code ---------- */
+  .code-shell{display:grid;grid-template-columns:1.05fr 1fr;gap:var(--sp-3);align-items:start;}
+  @media (max-width:980px){.code-shell{grid-template-columns:1fr;}}
+  .codecard{background:#2b2823;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid #1d1b17;}
+  .codecard .codebar{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;background:#211f1b;border-bottom:1px solid #38342d;}
+  .codecard .codebar .fname{color:#d9cdb0;font-size:var(--step--1);font-weight:700;margin-left:.3rem;}
+  .codecard .codebar .traffic{display:inline-flex;gap:6px;}
+  .codecard .codebar .traffic i{width:11px;height:11px;border-radius:50%;}
+  .codecard .copybtn{margin-left:auto;font:inherit;font-size:var(--step--1);font-weight:700;background:#38342d;color:#f4ecdb;border:1px solid #4a443a;padding:.35rem .75rem;border-radius:9px;cursor:pointer;}
+  .codecard .copybtn:hover{background:#4a443a;}
+  pre.code{margin:0;padding:var(--sp-3) var(--sp-4);color:#f4efe2;font-size:.92rem;line-height:1.7;overflow-x:auto;tab-size:2;}
+  pre.code .cl{display:block;border-radius:6px;margin:0 -.5rem;padding:0 .5rem;transition:background .15s,box-shadow .15s;}
+  pre.code .cl.active{background:rgba(217,131,36,.22);box-shadow:inset 3px 0 0 var(--accent);}
+  pre.code .cm{color:#9aa97f;font-style:italic;} pre.code .kw{color:#e0a87a;}
+  pre.code .fn{color:#87c6e8;} pre.code .num{color:#d98aa6;} pre.code .id{color:#f4efe2;} pre.code .str{color:#b6d99a;}
+  .explain{display:grid;gap:var(--sp-2);}
+  .explain-item{background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.9rem 1rem;}
+  .explain-item code{background:#fff;border:1px solid var(--line);border-radius:6px;padding:.05em .4em;font-size:.86em;color:var(--accent-d);}
+  .explain-item h4{margin-bottom:.25rem;font-size:var(--step-0);}
+  .explain-item p{margin:0;font-size:var(--step--1);color:var(--ink-soft);}
+  .explain-item p + p{margin-top:.4rem;}
+  .explain-item.star{background:linear-gradient(180deg,#eef6fb,#fff);border-color:#cfe0ee;}
+  .explain-item.star h4::before{content:"\2605";color:var(--sky);margin-right:.4rem;}
+
+  /* ---------- upload ---------- */
+  .cmd{display:flex;align-items:center;gap:.8rem;background:#211f1b;border-radius:var(--radius-sm);padding:1rem 1.1rem;box-shadow:var(--shadow);}
+  .cmd .prompt{color:var(--go);font-weight:800;}
+  .cmd code{color:#f4efe2;font-size:1.02rem;flex:1 1 auto;overflow-x:auto;}
+  .cmd .copybtn{font:inherit;font-weight:700;font-size:var(--step--1);background:#38342d;color:#f4ecdb;border:1px solid #4a443a;padding:.4rem .8rem;border-radius:9px;cursor:pointer;white-space:nowrap;}
+  .cmd .copybtn:hover{background:#4a443a;}
+  .success-box{margin-top:var(--sp-3);background:linear-gradient(180deg,#f1fbf1,#fff);border:1px solid #cfe9cf;border-radius:var(--radius-sm);padding:var(--sp-3) var(--sp-4);}
+  .success-box pre{background:#211f1b;color:#b6e3b6;border-radius:10px;padding:.8rem 1rem;margin:.6rem 0 0;font-size:.85rem;overflow-x:auto;}
+
+  /* ---------- See it run: thermometer + droplet + serial ---------- */
+  .run-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);align-items:start;}
+  @media (max-width:980px){.run-grid{grid-template-columns:1fr;}}
+  .stage{display:grid;place-items:center;gap:var(--sp-3);background:linear-gradient(180deg,#3a352e,#2a2722);border-radius:var(--radius);padding:var(--sp-5) var(--sp-3);box-shadow:var(--shadow-lg),inset 0 0 0 4px #4a443a;}
+  .press-hint{font-size:var(--step--1);color:#b6ad9c;font-weight:700;}
+  .run-panel{display:flex;flex-direction:column;gap:var(--sp-3);}
+  .readouts{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+  .ro{background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.7rem .9rem;}
+  .ro .lbl{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+  .ro .val{font-family:"Cascadia Code",Consolas,monospace;font-weight:800;font-size:1.05rem;color:var(--ink);}
+  .ro .val.hi{color:var(--stop-d);} .ro .val.lo{color:var(--sky);}
+
+  /* serial monitor pane */
+  .serial{background:#0f1412;border:1px solid #243029;border-radius:var(--radius-sm);box-shadow:var(--shadow);overflow:hidden;}
+  .serial .sbar{display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;background:#16201b;border-bottom:1px solid #243029;}
+  .serial .sbar .dot{width:9px;height:9px;border-radius:50%;background:#3ad07a;box-shadow:0 0 8px #3ad07a;}
+  .serial .sbar .stitle{color:#9fe7bd;font-size:.74rem;font-weight:800;letter-spacing:.03em;font-family:"Cascadia Code",Consolas,monospace;}
+  .serial .sbar .scmd{margin-left:auto;color:#5f7a6c;font-size:.7rem;font-family:"Cascadia Code",Consolas,monospace;}
+  .serial pre{margin:0;padding:.7rem .9rem;height:190px;overflow-y:auto;color:#bdf3cf;font-size:.82rem;line-height:1.55;font-family:"Cascadia Code",Consolas,monospace;}
+  .serial pre .new{animation:flashin .5s ease;}
+  .serial pre .muted{color:#5f7a6c;}
+  @keyframes flashin{from{background:rgba(58,208,122,.22);}to{background:transparent;}}
+  .mini-code{background:#2b2823;border:1px solid #1d1b17;border-radius:var(--radius-sm);overflow:hidden;}
+  .mini-code .mbar{padding:.4rem .8rem;background:#211f1b;border-bottom:1px solid #38342d;color:#d9cdb0;font-size:.72rem;font-weight:700;font-family:"Cascadia Code",Consolas,monospace;}
+  pre.mini{margin:0;padding:.6rem .9rem;color:#f4efe2;font-size:.8rem;line-height:1.6;overflow-x:auto;}
+  pre.mini .cl{display:block;border-radius:5px;margin:0 -.4rem;padding:0 .4rem;}
+  pre.mini .cl.active{background:rgba(217,131,36,.22);box-shadow:inset 3px 0 0 var(--accent);}
+
+  /* troubleshooting */
+  .trouble{display:grid;gap:var(--sp-2);}
+  .tcard{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);box-shadow:var(--shadow-sm);overflow:hidden;}
+  .tcard summary{list-style:none;cursor:pointer;padding:1rem 1.1rem;display:flex;align-items:center;gap:.8rem;font-weight:800;}
+  .tcard summary::-webkit-details-marker{display:none;}
+  .tcard summary .tsym{flex:0 0 2.1rem;height:2.1rem;border-radius:10px;display:grid;place-items:center;background:#fdecdf;color:var(--accent-d);font-size:1.2rem;}
+  .tcard summary .plus{margin-left:auto;color:var(--ink-faint);font-weight:900;transition:transform .2s;}
+  .tcard[open] summary .plus{transform:rotate(45deg);}
+  .tcard .tbody{padding:0 1.1rem 1.1rem 4rem;} .tcard .tbody p{margin:0;color:var(--ink-soft);}
+  .tcard .fix{margin-top:.5rem;padding:.65rem .85rem;background:#f1fbf1;border:1px solid #cfe9cf;border-radius:10px;font-size:var(--step--1);}
+  .tcard .fix b{color:var(--go-d);}
+  .tcard .fix code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:.05em .4em;font-size:.9em;color:var(--accent-d);}
+
+  /* challenge */
+  .challenge-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);}
+  @media (max-width:720px){.challenge-grid{grid-template-columns:1fr;}}
+  .ch-card{background:linear-gradient(180deg,#fff,#fffaf0);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--sp-4);position:relative;}
+  .ch-card .ch-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--accent);padding:.25rem .6rem;border-radius:999px;}
+  .ch-card h3{margin-top:.7rem;}
+  .ch-card pre{background:#211f1b;color:#f4efe2;border-radius:10px;padding:.8rem 1rem;font-size:.82rem;overflow-x:auto;}
+  .ch-card .cm{color:#9aa97f;}
+  .finish{margin-top:var(--sp-5);text-align:center;background:linear-gradient(180deg,#fff7e9,#fff);border:1px dashed var(--line-2);border-radius:var(--radius-lg);padding:var(--sp-5);}
+  .finish .conf{font-size:2.4rem;}
+  .finish h2{background:linear-gradient(115deg,var(--go-d),var(--accent-d),var(--c6));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  footer{text-align:center;color:var(--ink-faint);font-size:var(--step--1);padding:var(--sp-4) 0 var(--sp-2);}
+  .vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
+  @media (max-width:880px){
+    .sidenav{display:none;}
+    .topbar{display:block;position:sticky;top:0;z-index:40;background:rgba(251,247,238,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:.6rem clamp(.8rem,4vw,1.2rem);}
+    .topbar .tb-row{display:flex;align-items:center;gap:.7rem;}
+    .topbar .brand{margin-bottom:0;}
+    .topbar select{margin-left:auto;font:inherit;font-weight:700;font-size:var(--step--1);padding:.45rem .7rem;border-radius:10px;border:1px solid var(--line-2);background:var(--paper);color:var(--ink);}
+    main{padding-top:0;} section:first-of-type{padding-top:var(--sp-3);}
+    html{scroll-padding-top:120px;} .progress-wrap{top:52px;}
+  }
+  @media (max-width:560px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr;}.hero{padding:1.3rem;}.readouts{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#overview">Skip to content</a>
+<div class="shell">
+  <!-- ===================== SIDE NAV ===================== -->
+  <nav class="sidenav" aria-label="Section navigation">
+    <div class="brand">
+      <span class="dots" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></span>
+      <span><b>Project 30</b><span>DHT11 Sensor</span></span>
+    </div>
+    <p class="nav-progress" id="navProgress">Section 1 of 8</p>
+    <ul class="navlist" id="navlist">
+      <span class="nav-fill" id="navFill" aria-hidden="true"></span>
+      <li><a href="#overview"  class="nav-link"><span class="num">1</span> Overview</a></li>
+      <li><a href="#idea"      class="nav-link"><span class="num">2</span> The new idea</a></li>
+      <li><a href="#wiring"    class="nav-link"><span class="num">3</span> Wiring it up</a></li>
+      <li><a href="#code"      class="nav-link"><span class="num">4</span> The code</a></li>
+      <li><a href="#upload"    class="nav-link"><span class="num">5</span> Upload</a></li>
+      <li><a href="#run"       class="nav-link"><span class="num">6</span> See it run</a></li>
+      <li><a href="#trouble"   class="nav-link"><span class="num">7</span> Troubleshooting</a></li>
+      <li><a href="#challenge" class="nav-link"><span class="num">8</span> Challenge</a></li>
+    </ul>
+  </nav>
+  <div class="topbar">
+    <div class="tb-row">
+      <div class="brand"><span class="dots" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></span><span><span style="font-weight:800">DHT11 Sensor</span></span></div>
+      <label class="vh" for="mobileNav">Jump to section</label>
+      <select id="mobileNav">
+        <option value="#overview">1. Overview</option>
+        <option value="#idea">2. The new idea</option>
+        <option value="#wiring">3. Wiring it up</option>
+        <option value="#code">4. The code</option>
+        <option value="#upload">5. Upload</option>
+        <option value="#run">6. See it run</option>
+        <option value="#trouble">7. Troubleshooting</option>
+        <option value="#challenge">8. Challenge</option>
+      </select>
+    </div>
+  </div>
+
+  <main>
+    <div class="progress-wrap">
+      <div class="progress-track" id="progressTrack">
+        <span class="progress-label" id="progressText">Getting started</span>
+        <div class="progress-bar" aria-hidden="true"></div>
+        <span class="progress-label" id="progressPct">0%</span>
+      </div>
+    </div>
+
+    <!-- ============== 1. OVERVIEW ============== -->
+    <section id="overview" aria-labelledby="overview-h">
+      <div class="hero">
+        <p class="eyebrow">Project 30 &middot; Beginner build</p>
+        <h1 id="overview-h">DHT11 Temperature &amp; Humidity Sensor</h1>
+        <p class="lead">Until now your Arduino has read simple things &mdash; a button is pressed or not, a knob is turned a little or a lot. The DHT11 is your first <b>real digital sensor</b>: a little blue module that measures the actual <b>temperature</b> and <b>humidity</b> of the room and sends back two precise numbers. Plug in three wires, and your board can feel the weather.</p>
+        <div class="hero-badges">
+          <span class="badge"><span class="swatch" style="background:var(--sky)"></span> 1 DHT11 module</span>
+          <span class="badge">&#128268; 5V + Pin 8 + GND</span>
+          <span class="badge">&#127777;&#65039; temp + humidity</span>
+          <span class="badge">&#9201; ~15 min</span>
+        </div>
+        <div class="hero-motif" aria-hidden="true"><div class="mtherm" id="heroTherm"></div><div class="mdrop" id="heroDrop"></div></div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top:var(--sp-4)">
+        <div class="card">
+          <h3>What you'll build</h3>
+          <p>A DHT11 module sitting on your breadboard, wired with just <b>three pins</b>: power, data, ground. Every two seconds the Arduino asks the sensor for the latest readings and the serial monitor prints a tidy line like <code>temp=23.5C&nbsp;&nbsp;humidity=48%</code>. Breathe near it, cup it in your warm hand, and <b>watch the numbers move</b>.</p>
+          <div class="callout amber"><span class="ic" aria-hidden="true">&#128161;</span><p>The clever part: <b>one single data wire</b> carries <em>both</em> temperature and humidity. The sensor and the library handle a fast, fiddly conversation behind the scenes &mdash; you just ask for two numbers.</p></div>
+        </div>
+        <div class="card">
+          <h3>What you'll learn</h3>
+          <ul class="learn-list">
+            <li><span class="k" aria-hidden="true">1</span><div><b>A library does the hard part</b><p>The <code>DHT</code> library handles the tricky microsecond timing on the data line, so your code stays a clean two lines.</p></div></li>
+            <li><span class="k" aria-hidden="true">2</span><div><b>Reading real numbers</b><p>Sensors hand back <code>float</code> values (with decimals) &mdash; not just HIGH/LOW. We store them and print them.</p></div></li>
+            <li><span class="k" aria-hidden="true">3</span><div><b>Checking a reading is valid</b><p><code>isnan()</code> spots a failed read so a hiccup prints a friendly retry instead of garbage.</p></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:var(--sp-3)">
+        <h3>Parts at a glance</h3>
+        <p style="margin-bottom:var(--sp-3)">A wonderfully short list. The star is the <b>DHT11 module</b> &mdash; the little board with a perforated blue (or white) sensor cap and three header pins labelled <b>+ / S / &minus;</b> (that's VCC, DATA/Signal, and GND).</p>
+        <ul class="parts">
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="36" height="34" viewBox="0 0 36 34"><rect x="8" y="6" width="20" height="22" rx="2" fill="#2f6fb0" stroke="#1f4d80"/><g fill="#1f4d80"><circle cx="13" cy="11" r="1.3"/><circle cx="18" cy="11" r="1.3"/><circle cx="23" cy="11" r="1.3"/><circle cx="13" cy="16" r="1.3"/><circle cx="18" cy="16" r="1.3"/><circle cx="23" cy="16" r="1.3"/><circle cx="13" cy="21" r="1.3"/><circle cx="18" cy="21" r="1.3"/><circle cx="23" cy="21" r="1.3"/></g><g stroke="#888" stroke-width="1.6"><line x1="12" y1="28" x2="12" y2="32"/><line x1="18" y1="28" x2="18" y2="32"/><line x1="24" y1="28" x2="24" y2="32"/></g></svg></span><span><span class="pname">DHT11 module</span><span class="pqty">Qty 1 &middot; the sensor</span></span></li>
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M4 17 h7 l3 -7 l4 14 l4 -10 l3 3 h11" fill="none" stroke="#2f8fc0" stroke-width="2"/></svg></span><span><span class="pname">Jumper wires</span><span class="pqty">Qty 3 &middot; + / S / &minus;</span></span></li>
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><rect x="4" y="7" width="26" height="20" rx="3" fill="#f3ecdb" stroke="#cbbd9d"/><g fill="#cbbd9d"><circle cx="9" cy="13" r="1"/><circle cx="13" cy="13" r="1"/><circle cx="17" cy="13" r="1"/><circle cx="21" cy="13" r="1"/><circle cx="25" cy="13" r="1"/></g></svg></span><span><span class="pname">Breadboard</span><span class="pqty">+ Mega 2560 &amp; USB</span></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============== 2. THE NEW IDEA ============== -->
+    <section id="idea" aria-labelledby="idea-h">
+      <p class="eyebrow">Before we wire</p>
+      <h2 id="idea-h">One wire, two measurements</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Both numbers down a single wire</h3>
+          <p>You might expect temperature and humidity to need a wire each. They don't. The DHT11 packs both readings into a fast burst of pulses and sends them down <b>one data line</b> (the <b>S</b> pin). Power and ground do their usual jobs; all the information rides on that one wire.</p>
+          <p style="margin-bottom:0">It does this with split-second timing &mdash; pulses just microseconds long. Reading them by hand would be a nightmare, which is exactly why we lean on a library.</p>
+        </div>
+        <div class="card">
+          <h3>The library does the tricky timing</h3>
+          <p>We <code>#include &lt;DHT.h&gt;</code> and let the <b>DHT sensor library</b> (plus <b>Adafruit Unified Sensor</b>) do the microsecond dance for us. After that, asking for a reading is delightfully simple.</p>
+          <div class="callout sky"><span class="ic" aria-hidden="true">&#128218;</span><p style="margin:0">Two friendly calls do it all: <code>dht.readTemperature()</code> hands back the degrees, <code>dht.readHumidity()</code> hands back the percent. The hard part is hidden &mdash; you just collect two numbers.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 3. WIRING ============== -->
+    <section id="wiring" aria-labelledby="wiring-h">
+      <p class="eyebrow">The main event</p>
+      <h2 id="wiring-h">Wiring it up, step by step</h2>
+      <p class="lead">The diagram is drawn the way it sits on your desk: <b>Mega on the left with the USB &amp; power facing away from you</b>, the <b>breadboard on the right with column&nbsp;1 at the top-left</b>. The DHT11 module rides along the <b>a&ndash;e half</b> (nearest the Mega). Only <b>three wires</b> &mdash; use <b>Prev / Next</b> and watch each one light up.</p>
+
+      <div class="wiring-grid">
+        <div class="card diagram-card">
+          <svg id="bb" viewBox="0 0 512 540" role="img" aria-label="Top-down wiring diagram: Mega 2560 on the left with USB and power facing away, portrait breadboard on the right with column 1 at the top-left, and a DHT11 module wired with three wires.">
+            <title>DHT11 temperature and humidity sensor wiring</title>
+            <desc id="diagDesc">The diagram highlights the wire or part added at the current step.</desc>
+            <g id="bbStatic"></g>
+            <g id="bbLayers"></g>
+          </svg>
+          <div class="step-callout" id="stepCallout" aria-live="polite">Add now: seat the DHT11 module's three pins on the breadboard.</div>
+          <div class="legend" aria-hidden="true">
+            <span><span class="ln" style="background:#cf3b2f"></span> 5V (red)</span>
+            <span><span class="ln" style="background:#222"></span> GND (black)</span>
+            <span><span class="ln" style="background:var(--c5)"></span> data signal</span>
+            <span><span class="sq" style="background:#2f6fb0"></span> DHT11</span>
+          </div>
+        </div>
+
+        <div class="steps-panel" id="stepsPanel">
+          <div class="step-card" data-step="0" data-color="c6">
+            <button class="step-head" aria-expanded="true" aria-controls="sb0"><span class="badge-step" aria-hidden="true">0</span><span><span class="step-title">Seat the DHT11 module</span><span class="step-sub">Three header pins into the a&ndash;e half</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb0">
+              <p class="scaffold">The module's three pins are labelled <b>+</b> (VCC), <b>S</b> (DATA), and <b>&minus;</b> (GND). Press them in so each pin lands in its own column.</p>
+              <ol>
+                <li>Set the module so its pins land at about <span class="col-pill">columns 4&ndash;6</span> on the <b>a&ndash;e</b> side.</li>
+                <li>That gives us <b>+</b> at column 4, <b>S</b> at column 5, <b>&minus;</b> at column 6 &mdash; each on its own row of holes.</li>
+              </ol>
+              <div class="reuse-note">Check the print on your module &mdash; some read <b>VCC / DATA / GND</b> instead of <b>+ / S / &minus;</b>. They mean the same three pins.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="1" data-color="c1">
+            <button class="step-head" aria-expanded="false" aria-controls="sb1"><span class="badge-step" aria-hidden="true">1</span><span><span class="step-title">+ (VCC) &rarr; 5V</span><span class="step-sub">Power for the sensor</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb1">
+              <ol>
+                <li>Red wire from Mega <span class="pin-pill">5V</span> &rarr; the module's <b>+</b> pin at <span class="col-pill">column 4, row a</span>.</li>
+              </ol>
+              <div class="reuse-note">The DHT11 runs happily on 5V. This wire wakes the sensor up.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="2" data-color="c5">
+            <button class="step-head" aria-expanded="false" aria-controls="sb2"><span class="badge-step" aria-hidden="true">2</span><span><span class="step-title">S (DATA) &rarr; pin 8</span><span class="step-sub">The one wire that carries both numbers</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb2">
+              <ol>
+                <li>Signal wire from Mega <span class="pin-pill">pin 8</span> &rarr; the module's <b>S</b> pin at <span class="col-pill">column 5, row a</span>.</li>
+              </ol>
+              <div class="reuse-note"><b>This is the star wire.</b> Temperature <em>and</em> humidity both travel down this single data line &mdash; the library decodes the pulses for you.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="3" data-color="ground">
+            <button class="step-head" aria-expanded="false" aria-controls="sb3"><span class="badge-step" aria-hidden="true">3</span><span><span class="step-title">&minus; (GND) &rarr; GND</span><span class="step-sub">Complete the circuit</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb3">
+              <ol>
+                <li>Black wire from Mega <span class="pin-pill">GND</span> &rarr; the module's <b>&minus;</b> pin at <span class="col-pill">column 6, row a</span>.</li>
+              </ol>
+              <div class="count-check win-chip"><span aria-hidden="true">&#127881;</span> Done! Just three wires: +&rarr;5V, S&rarr;8, &minus;&rarr;GND. The sensor is ready to read the room.</div>
+            </div>
+          </div>
+
+          <div class="step-controls">
+            <button class="btn" id="prevStep">&larr; Prev</button>
+            <div class="step-dots" id="stepDots" role="tablist" aria-label="Wiring steps"></div>
+            <button class="btn primary" id="nextStep">Next &rarr;</button>
+          </div>
+          <div class="callout" style="margin-top:var(--sp-2)"><span class="ic" aria-hidden="true">&#9989;</span><p style="margin:0"><b>Golden rule:</b> match the labels exactly &mdash; <b>+</b> to <b>5V</b>, <b>S</b> to the signal pin (<b>8</b>), <b>&minus;</b> to <b>GND</b>. Swapping + and &minus; can overheat the sensor, so double-check before you plug in the USB.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 4. CODE ============== -->
+    <section id="code" aria-labelledby="code-h">
+      <p class="eyebrow">The brains</p>
+      <h2 id="code-h">The code, line by line</h2>
+      <p class="lead">It's already saved at <code>sketches\30_DHT11</code>. It needs the <b>DHT sensor library</b> and <b>Adafruit Unified Sensor</b> &mdash; install both once with <code>.\scripts\install-libs.ps1</code>. After that the sketch is short and sweet: ask for two numbers, then print them. Every <code>Serial.print</code> is a piece of the line you'll see in the monitor.</p>
+      <div class="code-shell">
+        <div class="codecard">
+          <div class="codebar"><span class="traffic" aria-hidden="true"><i style="background:#e0473b"></i><i style="background:#f1b500"></i><i style="background:#2faa55"></i></span><span class="fname">30_DHT11.ino</span><button class="copybtn" id="copyCode" type="button">Copy</button></div>
+          <pre class="code" id="codeBlock" tabindex="0" aria-label="Arduino sketch source code"></pre>
+        </div>
+        <div class="explain">
+          <div class="explain-item star"><h4>#include &amp; create the sensor</h4><p><code>#include &lt;DHT.h&gt;</code> pulls in the library. <code>DHT dht(DHTPIN, DHTTYPE)</code> creates a sensor object that knows it's a <b>DHT11</b> on <b>pin 8</b>. <code>DHTPIN</code> and <code>DHTTYPE</code> are <code>#define</code> names &mdash; change one place, change everywhere.</p></div>
+          <div class="explain-item star"><h4>setup() &mdash; wake the sensor</h4><p><code>Serial.begin(9600)</code> opens the monitor link, then <code>dht.begin()</code> starts the sensor. We print <code>"DHT11 temperature + humidity ready."</code> so you know it's alive.</p></div>
+          <div class="explain-item star"><h4>readTemperature &amp; readHumidity</h4><p><code>float t = dht.readTemperature();</code> gets the degrees C; <code>float h = dht.readHumidity();</code> gets the percent. Two simple asks &mdash; the library did all the hard timing on the data wire.</p></div>
+          <div class="explain-item"><h4>isnan() &amp; print the line</h4><p><code>if (isnan(t) || isnan(h))</code> catches a failed read and prints a retry. Otherwise the <code>Serial.print</code> lines build one tidy line like <code>temp=23.5C&nbsp;&nbsp;humidity=48%</code>. <code>delay(2000)</code> waits &mdash; the DHT11 is slow, so we don't rush it.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 5. UPLOAD ============== -->
+    <section id="upload" aria-labelledby="upload-h">
+      <p class="eyebrow">Send it to the board</p>
+      <h2 id="upload-h">Install the libraries, upload &amp; open the monitor</h2>
+      <p class="lead">This is the first project that needs an extra library. Run the install line <b>once</b>, then upload and open the serial monitor to watch the climate readings roll in:</p>
+      <div class="card">
+        <div class="cmd"><span class="prompt" aria-hidden="true">PS&gt;</span><code id="libCmd">.\scripts\install-libs.ps1</code><button class="copybtn" id="copyLib" type="button">Copy</button></div>
+        <div class="cmd" style="margin-top:var(--sp-2)"><span class="prompt" aria-hidden="true">PS&gt;</span><code id="uploadCmd">.\scripts\upload.ps1 30_DHT11</code><button class="copybtn" id="copyCmd" type="button">Copy</button></div>
+        <div class="cmd" style="margin-top:var(--sp-2)"><span class="prompt" aria-hidden="true">PS&gt;</span><code id="monitorCmd">.\scripts\monitor.ps1</code><button class="copybtn" id="copyMon" type="button">Copy</button></div>
+        <p style="margin:var(--sp-3) 0 0;font-size:var(--step--1);color:var(--ink-soft)">In the Claude chat you can run any line by prefixing it with <code style="background:var(--cream-2);padding:.05em .4em;border-radius:5px">!&nbsp;</code>. The monitor runs at <b>9600 baud</b> &mdash; press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop it.</p>
+        <div class="success-box">
+          <b style="color:var(--go-d)">&#10003; What success looks like</b>
+          <p style="margin:.4rem 0 0;font-size:var(--step--1);color:var(--ink-soft)">Upload ends with <b>done uploading</b>, then the monitor prints the greeting and a fresh reading every two seconds:</p>
+          <pre>done uploading 30_DHT11
+DHT11 temperature + humidity ready.
+temp=23.5C  humidity=48%
+temp=23.6C  humidity=49%</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 6. SEE IT RUN ============== -->
+    <section id="run" aria-labelledby="run-h">
+      <p class="eyebrow">Preview</p>
+      <h2 id="run-h">See it run</h2>
+      <p class="lead">This one runs itself &mdash; no button to hold. Watch four things move together every 2&nbsp;seconds: the <b>thermometer</b> rises and falls with the temperature, the <b>droplet</b> fills with the humidity, the <b>line of code</b> running on the board highlights, and the <b>serial monitor</b> prints exactly what <code>.\scripts\monitor.ps1</code> shows.</p>
+      <div class="run-grid">
+        <div class="stage">
+          <svg id="climateSim" viewBox="0 0 220 180" width="220" height="180" role="img" aria-label="Animated thermometer rising and falling with temperature, and a droplet filling with humidity.">
+            <!-- ===== thermometer ===== -->
+            <text x="46" y="20" fill="#b6ad9c" font-family="monospace" font-size="10" font-weight="700" text-anchor="middle">TEMP</text>
+            <!-- glass tube -->
+            <rect x="38" y="28" width="16" height="104" rx="8" fill="#1a1815" stroke="#4a443a" stroke-width="2"/>
+            <!-- mercury fill (height animated) -->
+            <rect id="thermFill" x="42" y="60" width="8" height="68" rx="4" fill="#e0473b"/>
+            <!-- bulb -->
+            <circle id="thermBulb" cx="46" cy="146" r="15" fill="#e0473b" stroke="#b22f24" stroke-width="2"/>
+            <!-- tick marks -->
+            <g stroke="#6f6a60" stroke-width="1.4">
+              <line x1="54" y1="44" x2="60" y2="44"/><line x1="54" y1="64" x2="60" y2="64"/>
+              <line x1="54" y1="84" x2="60" y2="84"/><line x1="54" y1="104" x2="60" y2="104"/>
+              <line x1="54" y1="124" x2="60" y2="124"/>
+            </g>
+            <text id="thermVal" x="46" y="176" fill="#ffd0c8" font-family="monospace" font-size="13" font-weight="800" text-anchor="middle">23.5C</text>
+
+            <!-- ===== humidity droplet ===== -->
+            <text x="158" y="20" fill="#b6ad9c" font-family="monospace" font-size="10" font-weight="700" text-anchor="middle">HUMIDITY</text>
+            <!-- droplet outline as clip -->
+            <defs>
+              <clipPath id="dropClip">
+                <path d="M158 34 C158 34 188 74 188 100 a30 30 0 1 1 -60 0 C128 74 158 34 158 34 Z"/>
+              </clipPath>
+            </defs>
+            <!-- empty droplet body -->
+            <path d="M158 34 C158 34 188 74 188 100 a30 30 0 1 1 -60 0 C128 74 158 34 158 34 Z" fill="#16252e" stroke="#3a5666" stroke-width="2"/>
+            <!-- water fill (height animated) inside clip -->
+            <rect id="dropFill" x="124" y="92" width="68" height="60" fill="#2f8fc0" clip-path="url(#dropClip)"/>
+            <!-- glossy droplet outline on top -->
+            <path d="M158 34 C158 34 188 74 188 100 a30 30 0 1 1 -60 0 C128 74 158 34 158 34 Z" fill="none" stroke="#5aa6cf" stroke-width="2"/>
+            <ellipse cx="148" cy="96" rx="6" ry="9" fill="#bfe6ff" opacity="0.45"/>
+            <text id="dropVal" x="158" y="104" fill="#eaf6ff" font-family="monospace" font-size="13" font-weight="800" text-anchor="middle">48%</text>
+          </svg>
+          <span class="press-hint" id="runHint">running on its own &middot; new reading every 2s</span>
+        </div>
+        <div class="run-panel">
+          <div class="readouts">
+            <div class="ro"><span class="lbl">temperature</span><span class="val hi" id="roTemp">23.5 C</span></div>
+            <div class="ro"><span class="lbl">humidity</span><span class="val lo" id="roHum">48 %</span></div>
+          </div>
+          <div class="mini-code">
+            <div class="mbar">loop() &mdash; running on the board</div>
+            <pre class="mini" id="miniCode"></pre>
+          </div>
+          <div class="serial">
+            <div class="sbar"><span class="dot" aria-hidden="true"></span><span class="stitle">COM5 &middot; 9600 baud</span><span class="scmd">monitor.ps1</span></div>
+            <pre id="serialOut" aria-live="polite" aria-label="Simulated serial monitor output"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 7. TROUBLESHOOTING ============== -->
+    <section id="trouble" aria-labelledby="trouble-h">
+      <p class="eyebrow">When something's off</p>
+      <h2 id="trouble-h">Troubleshooting</h2>
+      <p class="lead">Almost every &ldquo;it won't read!&rdquo; is one of these &mdash; and the serial monitor usually tells you which.</p>
+      <div class="trouble">
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#129514;</span> Every line says &ldquo;DHT read failed&rdquo;<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>The monitor scrolls <code>DHT read failed - retrying...</code> over and over. The sketch is running fine, but it can't talk to the sensor.</p><div class="fix"><b>Fix:</b> Check all three wires: <b>+</b> to <b>5V</b>, <b>S</b> to <code>pin 8</code>, <b>&minus;</b> to <b>GND</b>. A loose <b>S</b> (data) wire is the usual culprit. Also confirm the sketch uses <code>DHT11</code>, not <code>DHT22</code>.</div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#128230;</span> Compile error: &ldquo;DHT.h: No such file&rdquo;<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>Upload fails before it even reaches the board, complaining it can't find <code>DHT.h</code>.</p><div class="fix"><b>Fix:</b> The library isn't installed yet. Run <code>.\scripts\install-libs.ps1</code> once &mdash; it pulls in both the <b>DHT sensor library</b> and <b>Adafruit Unified Sensor</b> &mdash; then upload again.</div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#127777;&#65039;</span> The numbers never change<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>Readings appear, but they're frozen on the same temperature and humidity.</p><div class="fix"><b>Fix:</b> The DHT11 is slow and only changes by whole-ish steps. Cup it in your warm hand or breathe gently on the blue cap and wait a few <b>2-second</b> cycles &mdash; you'll see the numbers climb in the monitor.</div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#9889;</span> The monitor is blank or gibberish<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>No text, or random symbols.</p><div class="fix"><b>Fix:</b> The sketch prints at <b>9600 baud</b>, so run <code>.\scripts\monitor.ps1</code> (it defaults to 9600). If you opened another monitor, close it &mdash; only one program can use the port.</div></div></details>
+      </div>
+    </section>
+
+    <!-- ============== 8. CHALLENGE ============== -->
+    <section id="challenge" aria-labelledby="challenge-h">
+      <p class="eyebrow">Level up</p>
+      <h2 id="challenge-h">Challenge &amp; extend</h2>
+      <p class="lead">Got readings rolling in? Try one of these &mdash; small code tweaks, big payoff. Re-upload with the same command after each change.</p>
+      <div class="challenge-grid">
+        <div class="ch-card"><span class="ch-tag">Easy</span><h3>Show Fahrenheit too</h3><p>The library can hand you Fahrenheit directly &mdash; pass <code>true</code> to <code>readTemperature</code>. Print both:</p><pre><span class="kw">float</span> f = dht.readTemperature(<span class="kw">true</span>); <span class="cm">// F</span>
+Serial.print(<span class="str">"  ("</span>);
+Serial.print(f, <span class="num">1</span>);
+Serial.print(<span class="str">"F)"</span>);</pre><p style="margin:0">Now each line shows the room in both scales.</p></div>
+        <div class="ch-card"><span class="ch-tag">A step further</span><h3>A &ldquo;too humid&rdquo; alert</h3><p>Add the Project 6 LED on another pin and light it when humidity climbs past a threshold &mdash; a tiny weather warning:</p><pre><span class="kw">if</span> (h &gt; <span class="num">60</span>) {
+  digitalWrite(ledPin, HIGH); <span class="cm">// muggy!</span>
+} <span class="kw">else</span> {
+  digitalWrite(ledPin, LOW);
+}</pre><p style="margin:0">Hint: add <code>pinMode(ledPin, OUTPUT)</code> in <code>setup()</code> and wire the LED through a 220&Omega; resistor.</p></div>
+      </div>
+      <div class="finish"><div class="conf" aria-hidden="true">&#127881;</div><h2>Your Arduino can feel the weather now!</h2><p style="margin:0 auto;max-width:54ch;color:var(--ink-soft)">You wired a real digital sensor with three wires, let a <b>library</b> handle the microsecond timing, and read <b>two real numbers</b> &mdash; temperature and humidity &mdash; off a single data line, while the serial monitor narrated the room's climate. Libraries and sensors are how Arduino projects reach out and measure the real world. Onward!</p></div>
+    </section>
+
+    <footer>Project 30 &middot; DHT11 Temperature &amp; Humidity Sensor &middot; Inland / Keyestudio Mega 2560 R3 &middot; works fully offline</footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+
+  /* ============================================================
+     PORTRAIT DIAGRAM ENGINE  (shared across all guides)
+     Bench orientation: Mega LEFT (USB up), breadboard RIGHT,
+     column 1 at the TOP-LEFT, columns counting DOWN, rows a-e | f-j
+     running left->right, +/- rails vertical on the outer edges.
+     ============================================================ */
+  var COL_TOP = 96, DY = 30;                 // y of column 1, spacing downward
+  function colY(c){ return COL_TOP + (c - 1) * DY; }
+  var ROWX = { a:262, b:281, c:300, d:319, e:338, f:376, g:395, h:414, i:433, j:452 };
+  var RAIL = { plus:212, minus:230 };        // left rail pair x (the one we use)
+  var RRAIL = { minus:476, plus:492 };       // right rail pair x (drawn, idle)
+  var PORT_X = 174;                          // Mega right edge (pins face the board)
+  var BOARD_COLS = 11;                       // how many columns to draw
+
+  // Mega pin ports exposed on the right edge, top -> bottom
+  var PORTS = {
+    "5V":  { y:150, color:"#cf3b2f", label:"5V"  },
+    "GND": { y:225, color:"#222",    label:"GND" },
+    "D8":  { y:330, color:"#2f8fc0", label:"8"   }
+  };
+
+  /* order the Mega's right-edge ports to match the real board layout:
+     power at top, GND, then digital pins DESCENDING (13..2), analog at bottom.
+     Prevents the wire-crossing you get when pin 2 is drawn above pin 8. */
+  (function orderPorts(){
+    function rank(k){
+      if (k==="5V") return 0;
+      if (k==="3V3"||k==="3.3V"||k==="3V") return 1;
+      if (k==="VIN") return 2;
+      if (k==="GND") return 3;
+      if (k.charAt(0)==="A") return 1000 + parseInt(k.slice(1),10);      // analog -> bottom
+      var d = (k.charAt(0)==="D") ? k.slice(1) : k;
+      var n = parseInt(d,10);
+      if (!isNaN(n)) return 100 - n;                                    // digital -> descending
+      return 500;
+    }
+    var keys = Object.keys(PORTS);
+    var ys = keys.map(function(k){ return PORTS[k].y; }).sort(function(a,b){ return a-b; });
+    keys.slice().sort(function(a,b){ return rank(a)-rank(b); })
+        .forEach(function(k,i){ PORTS[k].y = ys[i]; });
+  })();
+
+
+  function E(tag, attrs){
+    var n = document.createElementNS(NS, tag), k;
+    for (k in attrs) if (attrs.hasOwnProperty(k)) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+  function dot(g, x, y, color, r){ g.appendChild(E("circle", { cx:x, cy:y, r:(r||3.4), fill:color })); }
+  function poly(g, pts, color, w){
+    g.appendChild(E("polyline", { points:pts, fill:"none", stroke:color, "stroke-width":(w||3.2),
+      "stroke-linecap":"round", "stroke-linejoin":"round" }));
+  }
+
+  /* ---- static scaffold: Mega + breadboard + rails + holes ---- */
+  (function buildStatic(){
+    var g = document.getElementById("bbStatic");
+    var gridBottom = colY(BOARD_COLS) + 14;
+
+    // ===== Arduino Mega (left, vertical, USB + power at the TOP / away) =====
+    g.appendChild(E("rect", { x:24, y:70, width:150, height:gridBottom-70+10, rx:9, fill:"#0b6b3a", stroke:"#085029", "stroke-width":1.5 }));
+    // USB connector sticking UP (away from viewer)
+    g.appendChild(E("rect", { x:40, y:36, width:46, height:40, rx:4, fill:"#b9c0c4", stroke:"#8a9094" }));
+    g.appendChild(E("rect", { x:46, y:30, width:34, height:12, rx:2, fill:"#cdd3d6" }));
+    // DC barrel jack, also at the top
+    g.appendChild(E("rect", { x:104, y:40, width:40, height:34, rx:6, fill:"#15110c", stroke:"#000" }));
+    g.appendChild(E("circle", { cx:124, cy:57, r:7, fill:"#3a3027" }));
+    // labels
+    var t = E("text", { x:99, y:300, fill:"#cdeedd", "font-family":"monospace", "font-size":13, "font-weight":700, "text-anchor":"middle", transform:"rotate(-90 99 300)" }); t.textContent = "MEGA 2560"; g.appendChild(t);
+    var away = E("text", { x:99, y:22, fill:"#9bb0a4", "font-family":"monospace", "font-size":9, "font-weight":700, "text-anchor":"middle" }); away.textContent = "USB / POWER  (facing away)"; g.appendChild(away);
+    // pin ports on the right edge
+    Object.keys(PORTS).forEach(function(key){
+      var p = PORTS[key];
+      g.appendChild(E("rect", { x:158, y:p.y-9, width:18, height:18, rx:3, fill:"#0a5a31" }));
+      g.appendChild(E("circle", { id:"port_"+key, cx:PORT_X, cy:p.y, r:3.6, fill:"#e9c46a" }));
+      var lab = E("text", { x:150, y:p.y+4, fill:"#cdeedd", "font-family":"monospace", "font-size":10, "font-weight":800, "text-anchor":"end" }); lab.textContent = p.label; g.appendChild(lab);
+    });
+
+    // ===== Breadboard body =====
+    g.appendChild(E("rect", { x:198, y:70, width:308, height:gridBottom-70+10, rx:10, fill:"#f3ecdb", stroke:"#d6c8a6", "stroke-width":1.5 }));
+    // centre trough (vertical)
+    g.appendChild(E("rect", { x:352, y:84, width:20, height:gridBottom-84, fill:"#e7dcc1" }));
+    g.appendChild(E("line", { x1:362, y1:84, x2:362, y2:gridBottom, stroke:"#cdbf9c", "stroke-width":1, "stroke-dasharray":"3 3" }));
+
+    // rails (vertical): left + / - and right - / +
+    function rail(x, color){ g.appendChild(E("line", { x1:x, y1:84, x2:x, y2:gridBottom, stroke:color, "stroke-width":2 })); }
+    rail(RAIL.plus, "#cf3b2f"); rail(RAIL.minus, "#2f6f9e");
+    rail(RRAIL.minus, "#bcd0e0"); rail(RRAIL.plus, "#e8b6b0");
+    g.appendChild(E("text", { x:RAIL.plus, y:80, fill:"#cf3b2f", "font-family":"monospace", "font-size":11, "font-weight":800, "text-anchor":"middle" })).textContent = "+";
+    g.appendChild(E("text", { x:RAIL.minus, y:80, fill:"#2f6f9e", "font-family":"monospace", "font-size":11, "font-weight":800, "text-anchor":"middle" })).textContent = "−";
+
+    // row letters across the top
+    var rows = ["a","b","c","d","e","f","g","h","i","j"];
+    rows.forEach(function(r){
+      var t2 = E("text", { x:ROWX[r], y:80, fill:"#a8997a", "font-family":"monospace", "font-size":9, "text-anchor":"middle" }); t2.textContent = r; g.appendChild(t2);
+    });
+
+    // hole grid + rail holes + column numbers
+    for (var c = 1; c <= BOARD_COLS; c++){
+      var y = colY(c);
+      rows.forEach(function(r){
+        g.appendChild(E("circle", { cx:ROWX[r], cy:y, r:1.9, fill:"#cdbf9c" }));
+      });
+      // rail holes (left + right)
+      [RAIL.plus, RAIL.minus, RRAIL.minus, RRAIL.plus].forEach(function(rx){
+        g.appendChild(E("circle", { cx:rx, cy:y, r:1.7, fill:"#b7c6d2" }));
+      });
+      // column number every 5 (and column 1)
+      if (c === 1 || c % 5 === 0){
+        var cn = E("text", { x:248, y:y+3, fill:"#9c7a44", "font-family":"monospace", "font-size":8.5, "font-weight":800, "text-anchor":"end" }); cn.textContent = c; g.appendChild(cn);
+      }
+    }
+    // "1" call-out at the very top-left so orientation is unmistakable
+    var one = E("text", { x:248, y:colY(1)+3, fill:"#b56712", "font-family":"monospace", "font-size":10, "font-weight":900, "text-anchor":"end" }); one.textContent = "1"; g.appendChild(one);
+  })();
+
+  /* ---- drawing primitives (operate on a step layer <g>) ---- */
+  function portToRail(g, portKey, railX, atCol, color){
+    var p = PORTS[portKey], y = colY(atCol);
+    poly(g, PORT_X+" "+p.y+" "+railX+" "+p.y+" "+railX+" "+y, color, 3.4);
+    dot(g, PORT_X, p.y, color); dot(g, railX, y, color);
+  }
+  function railToHole(g, railX, col, row, color){
+    var y = colY(col), x = ROWX[row];
+    poly(g, railX+" "+y+" "+x+" "+y, color, 3.2);
+    dot(g, railX, y, color); dot(g, x, y, color);
+  }
+  function portToHole(g, portKey, col, row, color){
+    var p = PORTS[portKey], y = colY(col), x = ROWX[row];
+    poly(g, PORT_X+" "+p.y+" "+x+" "+p.y+" "+x+" "+y, color, 3.2);
+    dot(g, PORT_X, p.y, color); dot(g, x, y, color);
+  }
+
+  /* ---- DHT11 module body: a labelled blue gridded block straddling the
+         a-e/f-j halves, with three labelled header pins (+, S, -) reaching
+         down into the a-e holes ---- */
+  function dhtModule(g, colVCC, colDATA, colGND){
+    var yT = colY(colVCC) - 14, yB = colY(colGND) + 14;
+    var bx0 = ROWX.c - 6, bx1 = ROWX.h + 6;        // box spans across the a-e/f-j halves
+    // blue body
+    g.appendChild(E("rect", { x:bx0, y:yT, width:bx1-bx0, height:yB-yT, rx:7, fill:"#2f6fb0", stroke:"#1f4d80", "stroke-width":2 }));
+    g.appendChild(E("text", { x:(bx0+bx1)/2, y:yT+15, fill:"#eaf2fb", "font-family":"monospace", "font-size":10, "font-weight":800, "text-anchor":"middle" })).textContent = "DHT11";
+    // perforated sensor-cap grid (the signature gridded look)
+    var gx0 = bx0 + 12, gy0 = yT + 24, cols = 4, rws = 3, sp = 9;
+    for (var ci = 0; ci < cols; ci++){
+      for (var ri = 0; ri < rws; ri++){
+        g.appendChild(E("circle", { cx:gx0 + ci*sp, cy:gy0 + ri*sp, r:2.1, fill:"#1f4d80" }));
+      }
+    }
+    g.appendChild(E("text", { x:bx1-10, y:(yT+yB)/2+2, fill:"#bcd6ef", "font-family":"monospace", "font-size":7, "font-weight":700, "text-anchor":"end" })).textContent = "temp";
+    g.appendChild(E("text", { x:bx1-10, y:(yT+yB)/2+13, fill:"#bcd6ef", "font-family":"monospace", "font-size":7, "font-weight":700, "text-anchor":"end" })).textContent = "+humid";
+    // three labelled header pins reaching down into the a-e holes
+    var pins = [ [colVCC,"+"], [colDATA,"S"], [colGND,"−"] ];
+    pins.forEach(function(pr){
+      var yy = colY(pr[0]), xh = ROWX.a;
+      g.appendChild(E("line", { x1:bx0, y1:yy, x2:xh, y2:yy, stroke:"#cbb98c", "stroke-width":2 }));
+      g.appendChild(E("circle", { cx:bx0, cy:yy, r:2.6, fill:"#1f4d80" }));
+      dot(g, xh, yy, "#cbb98c");
+      g.appendChild(E("text", { x:bx0-3, y:yy-4, fill:"#eaf2fb", "font-family":"monospace", "font-size":8, "font-weight":800, "text-anchor":"end" })).textContent = pr[1];
+    });
+  }
+
+  /* ---- build the wiring step layers (DHT11-specific) ---- */
+  var D_VCC = 4, D_DATA = 5, D_GND = 6;   // columns for the three header pins
+  (function buildLayers(){
+    var host = document.getElementById("bbLayers");
+    function layer(i){ var g = E("g", { "class":"layer", "data-layer":i }); host.appendChild(g); return g; }
+
+    var g0 = layer(0); dhtModule(g0, D_VCC, D_DATA, D_GND);              // seat the module
+
+    var g1 = layer(1); portToHole(g1, "5V", D_VCC, "a", "#cf3b2f");      // + -> 5V
+
+    var g2 = layer(2); portToHole(g2, "D8", D_DATA, "a", "#2f8fc0");     // S -> pin 8
+
+    var g3 = layer(3); portToHole(g3, "GND", D_GND, "a", "#222");        // - -> GND
+  })();
+
+  /* ============================================================
+     Wiring step machine (progressive reveal)
+     ============================================================ */
+  var layers = [].slice.call(document.querySelectorAll("#bb .layer"));
+  var stepCards = [].slice.call(document.querySelectorAll(".step-card"));
+  var heads = [].slice.call(document.querySelectorAll(".step-head"));
+  var prevBtn = document.getElementById("prevStep"), nextBtn = document.getElementById("nextStep");
+  var dotsWrap = document.getElementById("stepDots"), diagDesc = document.getElementById("diagDesc");
+  var stepCallout = document.getElementById("stepCallout");
+  var stepNames = ["Seat the DHT11","+ to 5V","S to pin 8","− to GND"];
+  var callouts = [
+    "Add now: seat the DHT11 module's three pins (+, S, −) into columns 4-6.",
+    "Add now: red 5V wire from the Mega to the module's + pin (column 4).",
+    "Add now: signal wire from Mega pin 8 to the module's S (data) pin (column 5).",
+    "Add now: black GND wire from the Mega to the module's − pin (column 6)."
+  ];
+  var TOTAL = 4, current = 0, dots = [];
+  for (var i = 0; i < TOTAL; i++){
+    (function(idx){
+      var b = document.createElement("button");
+      b.type = "button"; b.setAttribute("role","tab");
+      b.setAttribute("aria-label","Go to step "+idx+": "+stepNames[idx]);
+      b.addEventListener("click", function(){ goStep(idx, {scroll:true}); });
+      dotsWrap.appendChild(b); dots.push(b);
+    })(i);
+  }
+  function applyLayers(){
+    layers.forEach(function(L){
+      var n = parseInt(L.getAttribute("data-layer"),10);
+      L.style.transition = "opacity .3s ease";
+      if (n === current){ L.style.opacity = "1"; L.style.filter = "drop-shadow(0 2px 5px rgba(0,0,0,.22))"; }
+      else if (n < current){ L.style.opacity = "0.45"; L.style.filter = "none"; }
+      else { L.style.opacity = "0"; L.style.filter = "none"; }
+    });
+    Object.keys(PORTS).forEach(function(k){
+      var p = document.getElementById("port_"+k); if (!p) return;
+      p.setAttribute("r","3.6"); p.style.filter = "none";
+    });
+  }
+  function setCards(){
+    stepCards.forEach(function(card){
+      var n = parseInt(card.getAttribute("data-step"),10), active = (n === current);
+      card.classList.toggle("is-active", active);
+      var h = card.querySelector(".step-head"); if (h) h.setAttribute("aria-expanded", active?"true":"false");
+    });
+    dots.forEach(function(d, idx){ d.setAttribute("aria-current", idx===current?"true":"false"); });
+    prevBtn.disabled = (current === 0);
+    nextBtn.disabled = (current === TOTAL-1);
+    nextBtn.innerHTML = (current === TOTAL-1) ? "All wired ✓" : "Next →";
+    if (diagDesc) diagDesc.textContent = "Step "+current+": "+stepNames[current]+".";
+    if (stepCallout) stepCallout.textContent = callouts[current];
+  }
+  function goStep(n, opts){
+    current = Math.max(0, Math.min(TOTAL-1, n));
+    applyLayers(); setCards();
+    if (opts && opts.scroll && stepCards[current]) stepCards[current].scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+  prevBtn.addEventListener("click", function(){ goStep(current-1, {scroll:true}); });
+  nextBtn.addEventListener("click", function(){ goStep(current+1, {scroll:true}); });
+  heads.forEach(function(h){ h.addEventListener("click", function(){ goStep(parseInt(h.closest(".step-card").getAttribute("data-step"),10)); }); });
+  document.getElementById("stepsPanel").addEventListener("keydown", function(e){
+    if (e.key==="ArrowRight"||e.key==="ArrowDown"){ e.preventDefault(); goStep(current+1); }
+    else if (e.key==="ArrowLeft"||e.key==="ArrowUp"){ e.preventDefault(); goStep(current-1); }
+  });
+  goStep(0);
+
+  /* ============================================================
+     CODE block + code-follower
+     Each line is an array entry; {h:html, id:tag} so the sim can
+     highlight the line(s) currently running on the board.
+     ============================================================ */
+  var CODE = [
+    {h:'<span class="cm">#include &lt;DHT.h&gt;</span>'},
+    {h:''},
+    {h:'<span class="cm">#define DHTPIN  8</span>'},
+    {h:'<span class="cm">#define DHTTYPE DHT11</span>'},
+    {h:''},
+    {h:'<span class="id">DHT</span> <span class="id">dht</span>(<span class="id">DHTPIN</span>, <span class="id">DHTTYPE</span>);'},
+    {h:''},
+    {h:'<span class="kw">void</span> <span class="fn">setup</span>() {', id:"setup"},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);', id:"setup"},
+    {h:'  <span class="id">dht</span>.<span class="fn">begin</span>();', id:"setup"},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"DHT11 temperature + humidity ready."</span>);', id:"setup"},
+    {h:'}'},
+    {h:''},
+    {h:'<span class="kw">void</span> <span class="fn">loop</span>() {'},
+    {h:'  <span class="kw">float</span> <span class="id">t</span> = <span class="id">dht</span>.<span class="fn">readTemperature</span>();    <span class="cm">// degrees C</span>', id:"readT"},
+    {h:'  <span class="kw">float</span> <span class="id">h</span> = <span class="id">dht</span>.<span class="fn">readHumidity</span>();       <span class="cm">// percent</span>', id:"readH"},
+    {h:''},
+    {h:'  <span class="kw">if</span> (<span class="fn">isnan</span>(<span class="id">t</span>) || <span class="fn">isnan</span>(<span class="id">h</span>)) {', id:"chk"},
+    {h:'    <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"DHT read failed - retrying..."</span>);', id:"chk"},
+    {h:'  } <span class="kw">else</span> {'},
+    {h:'    <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"temp="</span>);', id:"print"},
+    {h:'    <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="id">t</span>, <span class="num">1</span>);', id:"print"},
+    {h:'    <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"C  humidity="</span>);', id:"print"},
+    {h:'    <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="id">h</span>, <span class="num">0</span>);', id:"print"},
+    {h:'    <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"%"</span>);', id:"print"},
+    {h:'  }'},
+    {h:'  <span class="fn">delay</span>(<span class="num">2000</span>);                        <span class="cm">// DHT11 is slow</span>', id:"wait"},
+    {h:'}'}
+  ];
+  function renderCode(host, miniHost){
+    host.innerHTML = "";
+    CODE.forEach(function(ln){
+      var s = document.createElement("span");
+      s.className = "cl"; if (ln.id) s.setAttribute("data-id", ln.id);
+      s.innerHTML = ln.h || "&nbsp;";
+      host.appendChild(s);
+    });
+    // mini code = just the loop body (ids readT/readH/print/wait)
+    miniHost.innerHTML = "";
+    var MINI = [
+      {h:'<span class="kw">float</span> t = <span class="id">dht</span>.<span class="fn">readTemperature</span>();', id:"readT"},
+      {h:'<span class="kw">float</span> h = <span class="id">dht</span>.<span class="fn">readHumidity</span>();', id:"readH"},
+      {h:'<span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"temp="</span>); ...', id:"print"},
+      {h:'<span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"humidity="</span>); ...', id:"print"},
+      {h:'<span class="fn">delay</span>(<span class="num">2000</span>);', id:"wait"}
+    ];
+    MINI.forEach(function(ln){
+      var s = document.createElement("span"); s.className="cl"; s.setAttribute("data-id", ln.id);
+      s.innerHTML = ln.h; miniHost.appendChild(s);
+    });
+  }
+  var codeBlock = document.getElementById("codeBlock");
+  var miniCode = document.getElementById("miniCode");
+  renderCode(codeBlock, miniCode);
+
+  function highlight(id){
+    [codeBlock, miniCode].forEach(function(host){
+      [].forEach.call(host.querySelectorAll(".cl"), function(s){
+        s.classList.toggle("active", !!id && s.getAttribute("data-id") === id);
+      });
+    });
+  }
+
+  /* ============================================================
+     Serial monitor pane
+     ============================================================ */
+  var serialOut = document.getElementById("serialOut");
+  function serialLine(text, muted){
+    var s = document.createElement("span");
+    s.className = "new" + (muted ? " muted" : "");
+    s.textContent = text + "\n";
+    serialOut.appendChild(s);
+    while (serialOut.childNodes.length > 60) serialOut.removeChild(serialOut.firstChild);
+    serialOut.scrollTop = serialOut.scrollHeight;
+    setTimeout(function(){ s.className = muted ? "muted" : ""; }, 500);
+  }
+  serialLine("DHT11 temperature + humidity ready.", true);
+
+  /* ============================================================
+     Self-running climate simulation (new reading every 2s)
+     Temperature drifts ~22-25C, humidity ~45-55%. An animated
+     thermometer rises/falls and a droplet fills, in sync with the
+     code-follower and the exact serial string.
+     ============================================================ */
+  var heroTherm = document.getElementById("heroTherm");
+  var heroDrop = document.getElementById("heroDrop");
+  var thermFill = document.getElementById("thermFill");
+  var thermBulb = document.getElementById("thermBulb");
+  var thermVal = document.getElementById("thermVal");
+  var dropFill = document.getElementById("dropFill");
+  var dropVal = document.getElementById("dropVal");
+  var roTemp = document.getElementById("roTemp"), roHum = document.getElementById("roHum");
+
+  // thermometer fill geometry (top of tube .. just above the bulb)
+  var TH_TOP = 40, TH_BOT = 130;   // y range the mercury can occupy
+  // droplet fill geometry (the rect that gets clipped to the droplet shape)
+  var DR_TOP = 36, DR_BOT = 128;   // y range the water surface can occupy
+
+  function setReading(t, h){
+    // ----- thermometer: map 18..30 C to the tube height -----
+    var tf = Math.max(0, Math.min(1, (t - 18) / (30 - 18)));
+    var topY = TH_BOT - tf * (TH_BOT - TH_TOP);
+    thermFill.setAttribute("y", topY);
+    thermFill.setAttribute("height", (146 - topY));   // reach down toward the bulb
+    var warm = t >= 24;
+    thermFill.setAttribute("fill", warm ? "#ff5b4d" : "#e0473b");
+    if (thermBulb) thermBulb.setAttribute("fill", warm ? "#ff5b4d" : "#e0473b");
+    thermVal.textContent = t.toFixed(1) + "C";
+    if (heroTherm) heroTherm.classList.add("on");
+
+    // ----- droplet: map 30..70 % to the water height -----
+    var hf = Math.max(0, Math.min(1, (h - 30) / (70 - 30)));
+    var surfY = DR_BOT - hf * (DR_BOT - DR_TOP);
+    dropFill.setAttribute("y", surfY);
+    dropFill.setAttribute("height", (DR_BOT + 8 - surfY));
+    dropVal.textContent = Math.round(h) + "%";
+    if (heroDrop) heroDrop.classList.add("on");
+
+    // ----- readouts -----
+    roTemp.textContent = t.toFixed(1) + " C";
+    roHum.textContent = Math.round(h) + " %";
+  }
+
+  // a gentle, believable drift around room conditions
+  var temp = 23.5, hum = 48, started = false;
+  function tick(){
+    if (started){
+      temp += (Math.random() - 0.5) * 0.8;
+      if (temp < 22) temp = 22 + Math.random()*0.4;
+      if (temp > 25) temp = 25 - Math.random()*0.4;
+      hum += (Math.random() - 0.5) * 2.4;
+      if (hum < 45) hum = 45 + Math.random()*1.5;
+      if (hum > 55) hum = 55 - Math.random()*1.5;
+    }
+    started = true;
+
+    // walk the code: readTemperature -> readHumidity -> check -> print
+    highlight("readT");
+    setTimeout(function(){ highlight("readH"); }, 160);
+    setTimeout(function(){ highlight("chk"); }, 320);
+    setTimeout(function(){
+      highlight("print");
+      setReading(temp, hum);
+      serialLine("temp=" + temp.toFixed(1) + "C  humidity=" + Math.round(hum) + "%");
+    }, 480);
+    setTimeout(function(){ highlight("wait"); }, 760);
+  }
+  setReading(temp, hum);
+  tick();
+  setInterval(tick, 2000);
+
+  /* ============================================================
+     Copy buttons
+     ============================================================ */
+  var SKETCH_TEXT = [
+    "/*",
+    " * 30_DHT11   (Inland kit Project 30)",
+    " * The DHT11 measures temperature AND humidity and sends both over a single",
+    " * data wire. The DHT library does the tricky timing; we just ask for the two",
+    " * numbers every couple of seconds and print them so .\\scripts\\monitor.ps1",
+    " * shows the room's climate.",
+    " *",
+    " * Library: DHT sensor library + Adafruit Unified Sensor (.\\scripts\\install-libs.ps1)",
+    " *",
+    " * Wiring (Mega 2560), module pins:",
+    " *   VCC/+ -> 5V    DATA/S -> pin 8    GND/- -> GND",
+    " *",
+    " * Watch it:  .\\scripts\\upload.ps1 30_DHT11  then  .\\scripts\\monitor.ps1",
+    " */",
+    "",
+    "#include <DHT.h>",
+    "",
+    "#define DHTPIN  8",
+    "#define DHTTYPE DHT11",
+    "",
+    "DHT dht(DHTPIN, DHTTYPE);",
+    "",
+    "void setup() {",
+    "  Serial.begin(9600);",
+    "  dht.begin();",
+    "  Serial.println(\"DHT11 temperature + humidity ready.\");",
+    "}",
+    "",
+    "void loop() {",
+    "  float t = dht.readTemperature();    // degrees C",
+    "  float h = dht.readHumidity();       // percent",
+    "",
+    "  if (isnan(t) || isnan(h)) {",
+    "    Serial.println(\"DHT read failed - retrying...\");",
+    "  } else {",
+    "    Serial.print(\"temp=\");",
+    "    Serial.print(t, 1);",
+    "    Serial.print(\"C  humidity=\");",
+    "    Serial.print(h, 0);",
+    "    Serial.println(\"%\");",
+    "  }",
+    "  delay(2000);                        // DHT11 is slow; don't poll too fast",
+    "}"
+  ].join("\n");
+  function flash(btn, ok){ var o = btn.textContent; btn.textContent = ok?"Copied ✓":"Press Ctrl+C"; btn.disabled = true; setTimeout(function(){ btn.textContent=o; btn.disabled=false; }, 1400); }
+  function copyText(text, btn){
+    if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ flash(btn,true); }, function(){ fb(text,btn); }); }
+    else fb(text, btn);
+  }
+  function fb(text, btn){ try{ var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.focus(); ta.select(); var ok=document.execCommand("copy"); document.body.removeChild(ta); flash(btn,ok); }catch(e){ flash(btn,false); } }
+  document.getElementById("copyCode").addEventListener("click", function(){ copyText(SKETCH_TEXT, this); });
+  document.getElementById("copyLib").addEventListener("click", function(){ copyText(".\\scripts\\install-libs.ps1", this); });
+  document.getElementById("copyCmd").addEventListener("click", function(){ copyText(".\\scripts\\upload.ps1 30_DHT11", this); });
+  document.getElementById("copyMon").addEventListener("click", function(){ copyText(".\\scripts\\monitor.ps1", this); });
+
+  /* ============================================================
+     Scroll-spy -> nav + progress
+     ============================================================ */
+  var sections = [].slice.call(document.querySelectorAll("main section[id]"));
+  var navLinks = [].slice.call(document.querySelectorAll(".nav-link"));
+  var navFill = document.getElementById("navFill"), navProgress = document.getElementById("navProgress");
+  var progressTrack = document.getElementById("progressTrack"), progressText = document.getElementById("progressText"), progressPct = document.getElementById("progressPct");
+  var mobileNav = document.getElementById("mobileNav");
+  var titles = ["Overview","The new idea","Wiring it up","The code","Upload","See it run","Troubleshooting","Challenge"];
+  function setActive(idx){
+    navLinks.forEach(function(a,i){ a.classList.toggle("active", i===idx); a.classList.toggle("done", i<idx); });
+    var pct = sections.length>1 ? Math.round((idx/(sections.length-1))*100) : 0;
+    progressTrack.style.setProperty("--pct", pct+"%");
+    progressText.textContent = titles[idx]||""; progressPct.textContent = pct+"%";
+    navProgress.textContent = "Section "+(idx+1)+" of "+sections.length;
+    if (navFill && navLinks.length>1) navFill.style.height = (idx/(navLinks.length-1)*100)+"%";
+    if (mobileNav && mobileNav.selectedIndex !== idx) mobileNav.selectedIndex = idx;
+  }
+  var activeIdx = 0;
+  if ("IntersectionObserver" in window){
+    var visible = {};
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ visible[en.target.id] = en.isIntersecting ? en.intersectionRatio : 0; });
+      var best=-1, bestR=-1;
+      sections.forEach(function(s,i){ var r=visible[s.id]||0; if (r>bestR+0.001){ bestR=r; best=i; } });
+      if (best>=0 && best!==activeIdx){ activeIdx=best; setActive(best); }
+    }, { rootMargin:"-45% 0px -45% 0px", threshold:[0,0.25,0.5,0.75,1] });
+    sections.forEach(function(s){ io.observe(s); });
+  }
+  setActive(0);
+  if (mobileNav) mobileNav.addEventListener("change", function(){ var t=document.querySelector(mobileNav.value); if (t) t.scrollIntoView({behavior:"smooth", block:"start"}); });
+})();
+</script>
+</body>
+</html>

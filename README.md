@@ -13,6 +13,9 @@ A command-line workspace for working through the Inland Super Starter Kit
 Arduino_learning/
 ├─ sketches/        one folder per sketch (the arduino-cli convention)
 │  └─ 01_Blink/01_Blink.ino
+├─ learn/           interactive HTML lesson guides — open in a browser
+│  ├─ 06_button_controlled_led.html   (one per kit Project; offline, self-contained)
+│  └─ _kit/template.html              reusable guide template (portrait diagram engine)
 ├─ scripts/         PowerShell helpers (see below)
 ├─ libraries/       drop hand-installed / custom libraries here
 ├─ docs/

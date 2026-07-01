@@ -12,3 +12,9 @@ build/
 Thumbs.db
 .DS_Store
 .vscode/
+
+# headless-render scratch
+.guidekit_tmp/
+
+# Personal build photos — kept local, never published
+projects/

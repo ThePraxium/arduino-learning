@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Project 32 - RC522 RFID reader</title>
+<style>
+  /* ============================================================
+     DAYLIGHT CLASSROOM - shared design system (matches Projects 4 & 5)
+     Portrait bench orientation: Mega left (USB up), breadboard right,
+     column 1 at the top-left. Plus a live serial-monitor pane + a
+     code-follower that highlights the line running on the board.
+     ============================================================ */
+  :root {
+    --step--1: clamp(0.83rem, 0.78rem + 0.2vw, 0.9rem);
+    --step-0:  clamp(1rem, 0.95rem + 0.25vw, 1.08rem);
+    --step-1:  clamp(1.2rem, 1.1rem + 0.5vw, 1.4rem);
+    --step-2:  clamp(1.5rem, 1.3rem + 0.9vw, 1.85rem);
+    --step-3:  clamp(1.95rem, 1.6rem + 1.6vw, 2.6rem);
+    --step-4:  clamp(2.4rem, 1.9rem + 2.4vw, 3.4rem);
+
+    --sp-1: 0.4rem; --sp-2: 0.8rem; --sp-3: 1.2rem;
+    --sp-4: 1.8rem; --sp-5: 2.6rem; --sp-6: 4rem;
+
+    --cream:#fbf7ee; --cream-2:#f4ecdb; --paper:#ffffff;
+    --ink:#2c2a26; --ink-soft:#5b574e; --ink-faint:#8c867a;
+    --line:#e7ddc7; --line-2:#d9cdb0;
+
+    --go:#2faa55; --go-d:#1f7d3e; --slow:#f1b500; --slow-d:#b98700;
+    --stop:#e0473b; --stop-d:#b22f24;
+    --accent:#d98324; --accent-d:#b56712; --sky:#2f7fb0;
+    --tan:#c9a36b; --tan-d:#9c7a44;
+
+    --c1:#e0473b; --c1d:#b22f24; --c2:#e8821e; --c2d:#b5640f;
+    --c3:#f1b500; --c3d:#b98700; --c4:#2faa55; --c4d:#1f7d3e;
+    --c5:#2f8fc0; --c5d:#1f6c95; --c6:#7a5cc8; --c6d:#5a3fa0;
+
+    --shadow-sm:0 1px 2px rgba(75,60,30,.06),0 2px 8px rgba(75,60,30,.06);
+    --shadow:0 4px 14px rgba(75,60,30,.10),0 10px 30px rgba(75,60,30,.07);
+    --shadow-lg:0 10px 30px rgba(75,60,30,.14),0 24px 60px rgba(75,60,30,.10);
+
+    --radius:20px; --radius-sm:12px; --radius-lg:28px;
+    --measure:66ch; --nav-w:256px;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:84px; }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+  }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fff7e6 0%, transparent 55%),
+      radial-gradient(900px 500px at -10% 10%, #f3fbef 0%, transparent 50%),
+      var(--cream);
+    color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    font-size:var(--step-0); line-height:1.65;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  h1,h2,h3,h4{line-height:1.15;letter-spacing:-0.01em;color:var(--ink);margin:0 0 var(--sp-2);}
+  h2{font-size:var(--step-3);} h3{font-size:var(--step-1);}
+  p{margin:0 0 var(--sp-3);max-width:var(--measure);}
+  a{color:var(--accent-d);}
+  code,kbd,pre{font-family:"Cascadia Code","Consolas","SFMono-Regular",ui-monospace,monospace;}
+  :focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:6px;}
+  .skip-link{position:absolute;left:-999px;top:0;z-index:999;background:var(--ink);color:#fff;padding:.6rem 1rem;border-radius:0 0 10px 0;}
+  .skip-link:focus{left:0;}
+
+  .shell{display:flex;align-items:flex-start;max-width:1320px;margin:0 auto;}
+
+  /* side nav */
+  .sidenav{position:sticky;top:0;align-self:flex-start;width:var(--nav-w);flex:0 0 var(--nav-w);height:100vh;overflow-y:auto;padding:var(--sp-4) var(--sp-3) var(--sp-4) var(--sp-4);}
+  .brand{display:flex;align-items:center;gap:.6rem;margin-bottom:var(--sp-4);}
+  .brand .dots{display:inline-flex;gap:4px;padding:6px;background:#36322b;border-radius:9px;box-shadow:var(--shadow-sm);}
+  .brand .dots i{width:9px;height:9px;border-radius:50%;display:block;}
+  .brand .dots i.c1{background:var(--c1);} .brand .dots i.c2{background:var(--c3);}
+  .brand .dots i.c3{background:var(--c4);} .brand .dots i.c4{background:var(--c5);}
+  .brand b{font-size:var(--step--1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;}
+  .brand span{font-size:var(--step-0);font-weight:700;color:var(--ink);}
+  .nav-progress{font-size:var(--step--1);color:var(--ink-faint);margin:0 0 var(--sp-2) 4px;font-variant-numeric:tabular-nums;}
+  .navlist{list-style:none;margin:0;padding:0;position:relative;}
+  .navlist::before{content:"";position:absolute;left:21px;top:18px;bottom:18px;width:3px;background:var(--line-2);border-radius:3px;z-index:0;}
+  .navlist .nav-fill{content:"";position:absolute;left:21px;top:18px;width:3px;height:0;background:linear-gradient(180deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c6));border-radius:3px;z-index:0;transition:height .35s cubic-bezier(.4,0,.2,1);}
+  .navlist a{position:relative;z-index:1;display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;border-radius:12px;color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:var(--step--1);transition:background .15s,color .15s,transform .15s;}
+  .navlist a .num{flex:0 0 1.7rem;height:1.7rem;display:grid;place-items:center;border-radius:50%;background:var(--cream);color:var(--ink-faint);font-size:.78rem;font-weight:800;border:3px solid var(--line-2);transition:inherit;}
+  .navlist a:hover{background:var(--paper);color:var(--ink);box-shadow:var(--shadow-sm);}
+  .navlist a:hover .num{border-color:var(--accent);}
+  .navlist a.active{color:var(--ink);}
+  .navlist a.active .num{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.08);box-shadow:0 0 0 5px #fdecdf;}
+  .navlist a.done .num{background:var(--go);color:#fff;border-color:var(--go);}
+
+  main{flex:1 1 auto;min-width:0;padding:0 clamp(1rem,4vw,3.5rem) var(--sp-6);}
+  .topbar{display:none;}
+  section{scroll-margin-top:84px;padding:var(--sp-5) 0;border-top:1px dashed var(--line-2);}
+  section:first-of-type{border-top:0;}
+  .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:var(--step--1);font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-d);margin-bottom:var(--sp-2);}
+  .eyebrow::before{content:"";width:26px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4),var(--c6));}
+  .lead{font-size:var(--step-1);color:var(--ink-soft);max-width:58ch;}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--sp-4);}
+  .card + .card{margin-top:var(--sp-3);}
+  .grid{display:grid;gap:var(--sp-3);}
+  .grid.cols-2{grid-template-columns:repeat(2,1fr);}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr);}
+
+  .hero{position:relative;overflow:hidden;background:radial-gradient(600px 300px at 90% 0%,#fff3da,transparent 60%),linear-gradient(180deg,#ffffff,#fffaf0);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:clamp(1.6rem,4vw,3rem);margin-top:var(--sp-4);}
+  .hero h1{font-size:var(--step-4);margin-bottom:var(--sp-2);background:linear-gradient(115deg,var(--ink) 30%,var(--accent-d));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero .lead{font-size:var(--step-1);margin-bottom:var(--sp-3);}
+  .hero-badges{display:flex;flex-wrap:wrap;gap:.6rem;}
+  .badge{display:inline-flex;align-items:center;gap:.45rem;background:var(--cream);border:1px solid var(--line-2);padding:.4rem .8rem;border-radius:999px;font-size:var(--step--1);font-weight:700;color:var(--ink-soft);}
+  .badge .swatch{width:11px;height:11px;border-radius:50%;}
+  .hero-motif{position:absolute;right:clamp(1rem,4vw,2.4rem);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;background:#36322b;box-shadow:var(--shadow-lg),inset 0 0 0 3px #4a443a;}
+  .hero-motif .mled{width:26px;height:26px;border-radius:50%;background:#1d1b17;box-shadow:inset 0 2px 5px rgba(0,0,0,.6);transition:background .15s,box-shadow .15s;}
+  .hero-motif .mled.on{background:radial-gradient(circle at 35% 30%,#fff,var(--sky));box-shadow:0 0 16px 4px rgba(47,127,176,.7);}
+  .hero-motif .mbtn{width:34px;height:22px;border-radius:5px;background:#2a2a2a;box-shadow:0 3px 0 #111, inset 0 2px 3px rgba(255,255,255,.18);}
+  @media (max-width:820px){.hero-motif{display:none;}}
+
+  /* progress bar */
+  .progress-wrap{position:sticky;top:0;z-index:30;background:rgba(251,247,238,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:.55rem clamp(1rem,4vw,3.5rem);margin:0 calc(-1 * clamp(1rem,4vw,3.5rem));}
+  .progress-track{--pct:0%;display:flex;align-items:center;gap:.6rem;max-width:1100px;margin:0 auto;}
+  .progress-bar{position:relative;flex:1 1 auto;height:8px;background:var(--cream-2);border-radius:99px;overflow:hidden;}
+  .progress-bar::after{content:"";position:absolute;inset:0;width:var(--pct);background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c6));border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .progress-label{font-size:var(--step--1);font-weight:700;color:var(--ink-soft);white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+  /* parts */
+  .parts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp-2);margin:0;padding:0;list-style:none;}
+  .part{display:flex;gap:.7rem;align-items:center;background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.7rem .8rem;}
+  .part .pico{flex:0 0 38px;height:38px;display:grid;place-items:center;}
+  .part .pname{font-weight:700;font-size:var(--step--1);line-height:1.25;}
+  .part .pqty{display:block;font-size:.72rem;color:var(--ink-faint);font-weight:700;letter-spacing:.03em;}
+
+  .learn-list{list-style:none;margin:0;padding:0;display:grid;gap:var(--sp-2);}
+  .learn-list li{display:flex;gap:.9rem;align-items:flex-start;padding:.9rem 1rem;border-radius:var(--radius-sm);background:var(--cream);border:1px solid var(--line);}
+  .learn-list .k{flex:0 0 2.1rem;height:2.1rem;border-radius:10px;display:grid;place-items:center;font-weight:900;color:#fff;box-shadow:var(--shadow-sm);}
+  .learn-list li:nth-child(1) .k{background:var(--c4);}
+  .learn-list li:nth-child(2) .k{background:var(--c5);}
+  .learn-list li:nth-child(3) .k{background:var(--c6);}
+  .learn-list b{display:block;} .learn-list p{margin:.15rem 0 0;color:var(--ink-soft);font-size:var(--step--1);}
+
+  .callout{display:flex;gap:1rem;align-items:flex-start;background:linear-gradient(180deg,#f1fbf1,#ffffff);border:1px solid #cfe9cf;border-left:5px solid var(--go);border-radius:var(--radius-sm);padding:var(--sp-3) var(--sp-4);}
+  .callout.amber{background:linear-gradient(180deg,#fff6e6,#fff);border-color:#f3dca8;border-left-color:var(--accent);}
+  .callout.sky{background:linear-gradient(180deg,#eef6fb,#fff);border-color:#cfe0ee;border-left-color:var(--sky);}
+  .callout .ic{flex:0 0 auto;font-size:1.6rem;line-height:1;}
+  .callout p:last-child{margin-bottom:0;}
+
+  /* ---------- wiring (portrait diagram + steps) ---------- */
+  .wiring-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);align-items:start;}
+  @media (max-width:1080px){.wiring-grid{grid-template-columns:1fr;}}
+  .diagram-card{padding:var(--sp-3);position:sticky;top:70px;}
+  @media (max-width:1080px){.diagram-card{position:static;}}
+  .diagram-card svg{width:100%;height:auto;display:block;border-radius:var(--radius-sm);}
+  .step-callout{margin-top:var(--sp-2);padding:.7rem .9rem;background:#fff6e6;border:1px solid #f3dca8;border-radius:12px;font-size:var(--step--1);font-weight:700;color:#8a5a16;display:flex;gap:.5rem;align-items:center;min-height:2.4rem;}
+  .step-controls{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-top:var(--sp-3);}
+  .btn{font:inherit;font-weight:700;cursor:pointer;border:1px solid var(--line-2);background:var(--paper);color:var(--ink);padding:.6rem 1.1rem;border-radius:12px;box-shadow:var(--shadow-sm);transition:transform .12s,box-shadow .12s,background .12s;display:inline-flex;align-items:center;gap:.5rem;}
+  .btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--shadow);}
+  .btn:active:not(:disabled){transform:translateY(0);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .btn.primary{background:var(--accent);border-color:var(--accent-d);color:#fff;}
+  .btn.primary:hover:not(:disabled){background:var(--accent-d);}
+  .step-dots{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;}
+  .step-dots button{width:12px;height:12px;border-radius:50%;border:1px solid var(--line-2);background:var(--cream-2);padding:0;cursor:pointer;}
+  .step-dots button[aria-current="true"]{background:var(--accent);border-color:var(--accent-d);transform:scale(1.2);}
+  .steps-panel{display:grid;gap:var(--sp-2);}
+  .step-card{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);box-shadow:var(--shadow-sm);overflow:hidden;transition:box-shadow .2s,border-color .2s,transform .2s;}
+  .step-card.is-active{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px);}
+  .step-card.is-active .step-head{background:linear-gradient(180deg,#fff7e9,#fff);}
+  .step-head{width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;gap:.9rem;padding:.9rem 1.1rem;background:var(--paper);border:0;font:inherit;}
+  .step-head .badge-step{flex:0 0 2.4rem;height:2.4rem;border-radius:12px;display:grid;place-items:center;font-weight:900;color:#fff;background:var(--ink);box-shadow:var(--shadow-sm);}
+  .step-card[data-color="ground"] .badge-step{background:#36322b;}
+  .step-card[data-color="c1"] .badge-step{background:var(--c1);}
+  .step-card[data-color="c2"] .badge-step{background:var(--c2);}
+  .step-card[data-color="c3"] .badge-step{background:var(--c3);color:#6b4e00;}
+  .step-card[data-color="c4"] .badge-step{background:var(--c4);}
+  .step-card[data-color="c5"] .badge-step{background:var(--c5);}
+  .step-card[data-color="c6"] .badge-step{background:var(--c6);}
+  .step-head .step-title{font-weight:800;font-size:var(--step-0);}
+  .step-head .step-sub{display:block;font-weight:600;font-size:var(--step--1);color:var(--ink-faint);}
+  .step-head .chev{margin-left:auto;transition:transform .2s;color:var(--ink-faint);}
+  .step-card.is-active .chev{transform:rotate(90deg);}
+  .step-body{padding:0 1.1rem;max-height:0;overflow:hidden;transition:max-height .35s,padding .35s;}
+  .step-card.is-active .step-body{padding:0 1.1rem 1.1rem;max-height:760px;}
+  .step-body ol{margin:0;padding-left:1.2rem;} .step-body li{margin:.3rem 0;}
+  .step-body li b{color:var(--ink);}
+  .scaffold{font-size:var(--step--1);color:var(--ink-soft);margin:0 0 .2rem;padding-bottom:.6rem;}
+  .pin-pill,.col-pill{display:inline-block;font-weight:800;font-size:.82em;padding:.05em .5em;border-radius:7px;border:1px solid var(--line-2);background:var(--cream-2);white-space:nowrap;}
+  .col-pill{background:#eef4fa;border-color:#cfe0ee;color:var(--sky);}
+  .reuse-note{margin:.7rem 0 0;padding:.55rem .8rem;background:#eef4fa;border:1px solid #cfe0ee;border-radius:10px;font-size:var(--step--1);color:#316b94;}
+  .reuse-note b{color:#245374;}
+  .win-chip{display:inline-flex;align-items:center;gap:.45rem;margin:.7rem 0 0;padding:.5rem .8rem;background:#f1fbf1;border:1px solid #cfe9cf;border-radius:999px;font-size:var(--step--1);font-weight:700;color:var(--go-d);}
+  .legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px dashed var(--line);}
+  .legend span{display:inline-flex;align-items:center;gap:.4rem;font-size:var(--step--1);color:var(--ink-soft);font-weight:600;}
+  .legend .ln{width:22px;height:6px;border-radius:4px;} .legend .sq{width:13px;height:13px;border-radius:3px;}
+
+  /* ---------- code ---------- */
+  .code-shell{display:grid;grid-template-columns:1.05fr 1fr;gap:var(--sp-3);align-items:start;}
+  @media (max-width:980px){.code-shell{grid-template-columns:1fr;}}
+  .codecard{background:#2b2823;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid #1d1b17;}
+  .codecard .codebar{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;background:#211f1b;border-bottom:1px solid #38342d;}
+  .codecard .codebar .fname{color:#d9cdb0;font-size:var(--step--1);font-weight:700;margin-left:.3rem;}
+  .codecard .codebar .traffic{display:inline-flex;gap:6px;}
+  .codecard .codebar .traffic i{width:11px;height:11px;border-radius:50%;}
+  .codecard .copybtn{margin-left:auto;font:inherit;font-size:var(--step--1);font-weight:700;background:#38342d;color:#f4ecdb;border:1px solid #4a443a;padding:.35rem .75rem;border-radius:9px;cursor:pointer;}
+  .codecard .copybtn:hover{background:#4a443a;}
+  pre.code{margin:0;padding:var(--sp-3) var(--sp-4);color:#f4efe2;font-size:.92rem;line-height:1.7;overflow-x:auto;tab-size:2;}
+  pre.code .cl{display:block;border-radius:6px;margin:0 -.5rem;padding:0 .5rem;transition:background .15s,box-shadow .15s;}
+  pre.code .cl.active{background:rgba(217,131,36,.22);box-shadow:inset 3px 0 0 var(--accent);}
+  pre.code .cm{color:#9aa97f;font-style:italic;} pre.code .kw{color:#e0a87a;}
+  pre.code .fn{color:#87c6e8;} pre.code .num{color:#d98aa6;} pre.code .id{color:#f4efe2;} pre.code .str{color:#b6d99a;}
+  .explain{display:grid;gap:var(--sp-2);}
+  .explain-item{background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.9rem 1rem;}
+  .explain-item code{background:#fff;border:1px solid var(--line);border-radius:6px;padding:.05em .4em;font-size:.86em;color:var(--accent-d);}
+  .explain-item h4{margin-bottom:.25rem;font-size:var(--step-0);}
+  .explain-item p{margin:0;font-size:var(--step--1);color:var(--ink-soft);}
+  .explain-item p + p{margin-top:.4rem;}
+  .explain-item.star{background:linear-gradient(180deg,#eef6fb,#fff);border-color:#cfe0ee;}
+  .explain-item.star h4::before{content:"\2605";color:var(--sky);margin-right:.4rem;}
+
+  /* ---------- upload ---------- */
+  .cmd{display:flex;align-items:center;gap:.8rem;background:#211f1b;border-radius:var(--radius-sm);padding:1rem 1.1rem;box-shadow:var(--shadow);}
+  .cmd .prompt{color:var(--go);font-weight:800;}
+  .cmd code{color:#f4efe2;font-size:1.02rem;flex:1 1 auto;overflow-x:auto;}
+  .cmd .copybtn{font:inherit;font-weight:700;font-size:var(--step--1);background:#38342d;color:#f4ecdb;border:1px solid #4a443a;padding:.4rem .8rem;border-radius:9px;cursor:pointer;white-space:nowrap;}
+  .cmd .copybtn:hover{background:#4a443a;}
+  .success-box{margin-top:var(--sp-3);background:linear-gradient(180deg,#f1fbf1,#fff);border:1px solid #cfe9cf;border-radius:var(--radius-sm);padding:var(--sp-3) var(--sp-4);}
+  .success-box pre{background:#211f1b;color:#b6e3b6;border-radius:10px;padding:.8rem 1rem;margin:.6rem 0 0;font-size:.85rem;overflow-x:auto;}
+
+  /* ---------- See it run: interactive button + serial ---------- */
+  .run-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);align-items:start;}
+  @media (max-width:980px){.run-grid{grid-template-columns:1fr;}}
+  .stage{display:grid;place-items:center;gap:var(--sp-3);background:linear-gradient(180deg,#3a352e,#2a2722);border-radius:var(--radius);padding:var(--sp-5) var(--sp-3);box-shadow:var(--shadow-lg),inset 0 0 0 4px #4a443a;}
+  /* RFID reader pad + card */
+  .reader{position:relative;width:188px;height:132px;border-radius:18px;background:linear-gradient(160deg,#1f3d57,#13283a);box-shadow:0 10px 26px rgba(0,0,0,.5),inset 0 0 0 3px #2c5475;display:grid;place-items:center;overflow:hidden;}
+  .reader .coil{width:120px;height:78px;border-radius:14px;border:3px solid rgba(120,190,240,.5);box-shadow:inset 0 0 0 8px rgba(120,190,240,.16);transition:border-color .2s,box-shadow .2s;}
+  .reader.lit .coil{border-color:#7fd0ff;box-shadow:inset 0 0 0 8px rgba(127,208,255,.32),0 0 22px 4px rgba(127,208,255,.55);}
+  .reader .rlab{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:.66rem;font-weight:800;color:#8fc4ec;font-family:"Cascadia Code",Consolas,monospace;letter-spacing:.05em;}
+  .reader .wave{position:absolute;inset:0;border-radius:18px;border:2px solid rgba(127,208,255,.0);}
+  .reader.lit .wave{animation:ripple .6s ease-out;}
+  @keyframes ripple{0%{border-color:rgba(127,208,255,.7);transform:scale(.7);}100%{border-color:rgba(127,208,255,0);transform:scale(1.05);}}
+  .card-token{position:absolute;top:-150px;left:50%;width:108px;height:70px;margin-left:-54px;border-radius:11px;background:linear-gradient(150deg,#e8a13a,#d4842a);box-shadow:0 8px 18px rgba(0,0,0,.45),inset 0 0 0 2px rgba(255,255,255,.25);display:grid;place-items:center;color:#5b3410;font-weight:900;font-size:.74rem;font-family:"Cascadia Code",Consolas,monospace;letter-spacing:.06em;transition:top .32s cubic-bezier(.34,1.4,.5,1),opacity .25s;opacity:0;z-index:3;}
+  .card-token.fob{background:linear-gradient(150deg,#5fbf8a,#2f9c66);color:#0d3a23;border-radius:34px;width:88px;}
+  .card-token.show{top:34px;opacity:1;}
+  .card-token .chip{position:absolute;top:9px;left:11px;width:16px;height:12px;border-radius:3px;background:#f4d58a;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2);}
+  .tap-row{display:flex;gap:.8rem;margin-top:.6rem;}
+  .tapbtn{border:0;cursor:pointer;font:inherit;font-weight:900;font-size:.92rem;letter-spacing:.03em;color:#fff;padding:.85rem 1.2rem;border-radius:14px;box-shadow:0 6px 0 rgba(0,0,0,.35),0 9px 16px rgba(0,0,0,.4);transition:transform .07s,box-shadow .07s;user-select:none;}
+  .tapbtn.card{background:radial-gradient(circle at 50% 30%,#e6a94c,#cf8424);}
+  .tapbtn.fob{background:radial-gradient(circle at 50% 30%,#56c089,#2f9c66);}
+  .tapbtn:active{transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,.35),0 3px 8px rgba(0,0,0,.4);}
+  .press-hint{font-size:var(--step--1);color:#b6ad9c;font-weight:700;}
+  .run-panel{display:flex;flex-direction:column;gap:var(--sp-3);}
+  .readouts{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+  .ro{background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.7rem .9rem;}
+  .ro .lbl{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+  .ro .val{font-family:"Cascadia Code",Consolas,monospace;font-weight:800;font-size:1.05rem;color:var(--ink);}
+  .ro .val.hi{color:var(--go-d);} .ro .val.lo{color:var(--sky);}
+
+  /* serial monitor pane */
+  .serial{background:#0f1412;border:1px solid #243029;border-radius:var(--radius-sm);box-shadow:var(--shadow);overflow:hidden;}
+  .serial .sbar{display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;background:#16201b;border-bottom:1px solid #243029;}
+  .serial .sbar .dot{width:9px;height:9px;border-radius:50%;background:#3ad07a;box-shadow:0 0 8px #3ad07a;}
+  .serial .sbar .stitle{color:#9fe7bd;font-size:.74rem;font-weight:800;letter-spacing:.03em;font-family:"Cascadia Code",Consolas,monospace;}
+  .serial .sbar .scmd{margin-left:auto;color:#5f7a6c;font-size:.7rem;font-family:"Cascadia Code",Consolas,monospace;}
+  .serial pre{margin:0;padding:.7rem .9rem;height:190px;overflow-y:auto;color:#bdf3cf;font-size:.82rem;line-height:1.55;font-family:"Cascadia Code",Consolas,monospace;}
+  .serial pre .new{animation:flashin .5s ease;}
+  .serial pre .muted{color:#5f7a6c;}
+  @keyframes flashin{from{background:rgba(58,208,122,.22);}to{background:transparent;}}
+  .mini-code{background:#2b2823;border:1px solid #1d1b17;border-radius:var(--radius-sm);overflow:hidden;}
+  .mini-code .mbar{padding:.4rem .8rem;background:#211f1b;border-bottom:1px solid #38342d;color:#d9cdb0;font-size:.72rem;font-weight:700;font-family:"Cascadia Code",Consolas,monospace;}
+  pre.mini{margin:0;padding:.6rem .9rem;color:#f4efe2;font-size:.8rem;line-height:1.6;overflow-x:auto;}
+  pre.mini .cl{display:block;border-radius:5px;margin:0 -.4rem;padding:0 .4rem;}
+  pre.mini .cl.active{background:rgba(217,131,36,.22);box-shadow:inset 3px 0 0 var(--accent);}
+
+  /* troubleshooting */
+  .trouble{display:grid;gap:var(--sp-2);}
+  .tcard{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);box-shadow:var(--shadow-sm);overflow:hidden;}
+  .tcard summary{list-style:none;cursor:pointer;padding:1rem 1.1rem;display:flex;align-items:center;gap:.8rem;font-weight:800;}
+  .tcard summary::-webkit-details-marker{display:none;}
+  .tcard summary .tsym{flex:0 0 2.1rem;height:2.1rem;border-radius:10px;display:grid;place-items:center;background:#fdecdf;color:var(--accent-d);font-size:1.2rem;}
+  .tcard summary .plus{margin-left:auto;color:var(--ink-faint);font-weight:900;transition:transform .2s;}
+  .tcard[open] summary .plus{transform:rotate(45deg);}
+  .tcard .tbody{padding:0 1.1rem 1.1rem 4rem;} .tcard .tbody p{margin:0;color:var(--ink-soft);}
+  .tcard .fix{margin-top:.5rem;padding:.65rem .85rem;background:#f1fbf1;border:1px solid #cfe9cf;border-radius:10px;font-size:var(--step--1);}
+  .tcard .fix b{color:var(--go-d);}
+  .tcard .fix code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:.05em .4em;font-size:.9em;color:var(--accent-d);}
+
+  /* challenge */
+  .challenge-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);}
+  @media (max-width:720px){.challenge-grid{grid-template-columns:1fr;}}
+  .ch-card{background:linear-gradient(180deg,#fff,#fffaf0);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--sp-4);position:relative;}
+  .ch-card .ch-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--accent);padding:.25rem .6rem;border-radius:999px;}
+  .ch-card h3{margin-top:.7rem;}
+  .ch-card pre{background:#211f1b;color:#f4efe2;border-radius:10px;padding:.8rem 1rem;font-size:.82rem;overflow-x:auto;}
+  .ch-card .cm{color:#9aa97f;}
+  .finish{margin-top:var(--sp-5);text-align:center;background:linear-gradient(180deg,#fff7e9,#fff);border:1px dashed var(--line-2);border-radius:var(--radius-lg);padding:var(--sp-5);}
+  .finish .conf{font-size:2.4rem;}
+  .finish h2{background:linear-gradient(115deg,var(--go-d),var(--accent-d),var(--c6));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  footer{text-align:center;color:var(--ink-faint);font-size:var(--step--1);padding:var(--sp-4) 0 var(--sp-2);}
+  .vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
+  @media (max-width:880px){
+    .sidenav{display:none;}
+    .topbar{display:block;position:sticky;top:0;z-index:40;background:rgba(251,247,238,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:.6rem clamp(.8rem,4vw,1.2rem);}
+    .topbar .tb-row{display:flex;align-items:center;gap:.7rem;}
+    .topbar .brand{margin-bottom:0;}
+    .topbar select{margin-left:auto;font:inherit;font-weight:700;font-size:var(--step--1);padding:.45rem .7rem;border-radius:10px;border:1px solid var(--line-2);background:var(--paper);color:var(--ink);}
+    main{padding-top:0;} section:first-of-type{padding-top:var(--sp-3);}
+    html{scroll-padding-top:120px;} .progress-wrap{top:52px;}
+  }
+  @media (max-width:560px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr;}.hero{padding:1.3rem;}.readouts{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#overview">Skip to content</a>
+<div class="shell">
+  <!-- ===================== SIDE NAV ===================== -->
+  <nav class="sidenav" aria-label="Section navigation">
+    <div class="brand">
+      <span class="dots" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></span>
+      <span><b>Project 32</b><span>RC522 RFID</span></span>
+    </div>
+    <p class="nav-progress" id="navProgress">Section 1 of 8</p>
+    <ul class="navlist" id="navlist">
+      <span class="nav-fill" id="navFill" aria-hidden="true"></span>
+      <li><a href="#overview"  class="nav-link"><span class="num">1</span> Overview</a></li>
+      <li><a href="#idea"      class="nav-link"><span class="num">2</span> How RFID works</a></li>
+      <li><a href="#wiring"    class="nav-link"><span class="num">3</span> Wiring it up</a></li>
+      <li><a href="#code"      class="nav-link"><span class="num">4</span> The code</a></li>
+      <li><a href="#upload"    class="nav-link"><span class="num">5</span> Upload</a></li>
+      <li><a href="#run"       class="nav-link"><span class="num">6</span> See it run</a></li>
+      <li><a href="#trouble"   class="nav-link"><span class="num">7</span> Troubleshooting</a></li>
+      <li><a href="#challenge" class="nav-link"><span class="num">8</span> Challenge</a></li>
+    </ul>
+  </nav>
+  <div class="topbar">
+    <div class="tb-row">
+      <div class="brand"><span class="dots" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></span><span><span style="font-weight:800">RC522 RFID</span></span></div>
+      <label class="vh" for="mobileNav">Jump to section</label>
+      <select id="mobileNav">
+        <option value="#overview">1. Overview</option>
+        <option value="#idea">2. How RFID works</option>
+        <option value="#wiring">3. Wiring it up</option>
+        <option value="#code">4. The code</option>
+        <option value="#upload">5. Upload</option>
+        <option value="#run">6. See it run</option>
+        <option value="#trouble">7. Troubleshooting</option>
+        <option value="#challenge">8. Challenge</option>
+      </select>
+    </div>
+  </div>
+
+  <main>
+    <div class="progress-wrap">
+      <div class="progress-track" id="progressTrack">
+        <span class="progress-label" id="progressText">Getting started</span>
+        <div class="progress-bar" aria-hidden="true"></div>
+        <span class="progress-label" id="progressPct">0%</span>
+      </div>
+    </div>
+
+    <!-- ============== 1. OVERVIEW ============== -->
+    <section id="overview" aria-labelledby="overview-h">
+      <div class="hero">
+        <p class="eyebrow">Project 32 &middot; Intermediate build</p>
+        <h1 id="overview-h">RC522 RFID card reader</h1>
+        <p class="lead">Wave a card or keyfob over a little blue board and its secret number appears in the serial monitor. This is the exact trick behind hotel keys, work badges, and transit cards. You'll wire the RC522 reader to your Mega over <b>SPI</b> &mdash; a fast four-wire conversation between chips &mdash; and read each tag's unique <b>UID</b>.</p>
+        <div class="hero-badges">
+          <span class="badge"><span class="swatch" style="background:var(--sky)"></span> RC522 reader</span>
+          <span class="badge">&#128268; SPI on pins 50-53</span>
+          <span class="badge">&#9889; 3.3V power (not 5V!)</span>
+          <span class="badge">&#9201; ~20 min</span>
+        </div>
+        <div class="hero-motif" aria-hidden="true"><div class="mled" id="heroLed"></div><div class="mbtn"></div></div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top:var(--sp-4)">
+        <div class="card">
+          <h3>What you'll build</h3>
+          <p>An RFID reader on your bench. Hold a card near the RC522's flat coil and the Arduino reads the card's <b>UID</b> &mdash; a unique string of hex numbers baked into the tag &mdash; and prints it. Tap a different tag, get a different number. The serial monitor shows you exactly which card just touched the reader.</p>
+          <div class="callout amber"><span class="ic" aria-hidden="true">&#9888;</span><p>One rule above all others: the RC522 runs on <b>3.3&nbsp;volts</b>. Wire its power pin to the Mega's <b>3V3</b>, never 5V &mdash; 5V can cook the chip.</p></div>
+        </div>
+        <div class="card">
+          <h3>What you'll learn</h3>
+          <ul class="learn-list">
+            <li><span class="k" aria-hidden="true">1</span><div><b>SPI &mdash; the four-wire bus</b><p>How chips talk fast over <code>SCK</code>, <code>MOSI</code>, <code>MISO</code> and a select pin (<code>SS</code>). The Mega has these on fixed pins.</p></div></li>
+            <li><span class="k" aria-hidden="true">2</span><div><b>Using a library</b><p>The <code>MFRC522</code> library hides the hard parts. You call simple functions; it handles the radio chatter.</p></div></li>
+            <li><span class="k" aria-hidden="true">3</span><div><b>A card's UID</b><p>Every tag carries a unique ID. Reading it is the first step toward locks, logins, and access control.</p></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:var(--sp-3)">
+        <h3>Parts at a glance</h3>
+        <p style="margin-bottom:var(--sp-3)">Just a handful. The RC522 module usually ships with a <b>card</b> and a <b>keyfob</b> &mdash; both are RFID tags, one flat, one keychain-sized.</p>
+        <ul class="parts">
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="40" height="34" viewBox="0 0 40 34"><rect x="5" y="5" width="30" height="24" rx="3" fill="#1f4e74" stroke="#13344e"/><rect x="9" y="9" width="16" height="13" rx="2" fill="none" stroke="#7fc0ec" stroke-width="2"/><g fill="#cfa44b"><circle cx="31" cy="9" r="1.4"/><circle cx="31" cy="14" r="1.4"/><circle cx="31" cy="19" r="1.4"/><circle cx="31" cy="24" r="1.4"/></g></svg></span><span><span class="pname">RC522 reader</span><span class="pqty">Qty 1 &middot; the module</span></span></li>
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="40" height="34" viewBox="0 0 40 34"><rect x="6" y="8" width="28" height="18" rx="3" fill="#e8a13a" stroke="#b5780f"/><rect x="10" y="12" width="7" height="5" rx="1" fill="#f4d58a"/></svg></span><span><span class="pname">RFID card</span><span class="pqty">Qty 1 &middot; flat tag</span></span></li>
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="20" r="9" fill="#2f9c66" stroke="#1f6e46"/><circle cx="17" cy="20" r="3.5" fill="#cdeede"/><rect x="14" y="4" width="6" height="9" rx="3" fill="none" stroke="#1f6e46" stroke-width="2"/></svg></span><span><span class="pname">Keyfob tag</span><span class="pqty">Qty 1 &middot; keychain tag</span></span></li>
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M6 17 H34" stroke="#2f8fc0" stroke-width="2.4"/><path d="M6 11 H30" stroke="#e0473b" stroke-width="2.4"/><path d="M6 23 H30" stroke="#222" stroke-width="2.4"/></svg></span><span><span class="pname">Jumper wires</span><span class="pqty">Qty 7 &middot; M-to-F</span></span></li>
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><rect x="4" y="7" width="26" height="20" rx="3" fill="#f3ecdb" stroke="#cbbd9d"/><g fill="#cbbd9d"><circle cx="9" cy="13" r="1"/><circle cx="13" cy="13" r="1"/><circle cx="17" cy="13" r="1"/><circle cx="21" cy="13" r="1"/><circle cx="25" cy="13" r="1"/></g></svg></span><span><span class="pname">Breadboard (optional)</span><span class="pqty">+ Mega 2560 &amp; USB</span></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============== 2. HOW RFID WORKS ============== -->
+    <section id="idea" aria-labelledby="idea-h">
+      <p class="eyebrow">Before we wire</p>
+      <h2 id="idea-h">How a card with no battery talks back</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>The reader powers the card</h3>
+          <p>The RC522 hums a <b>13.56&nbsp;MHz</b> radio field out of its flat copper coil. When a card drifts into that field, the card's own little coil <b>harvests</b> just enough energy from it to wake up &mdash; no battery needed. That's why a tag works forever and survives the wash.</p>
+          <p style="margin-bottom:0">Awake, the card whispers its <b>UID</b> back through the same field. The reader catches it and hands it to your Arduino.</p>
+        </div>
+        <div class="card">
+          <h3>SPI &mdash; four wires, one fast bus</h3>
+          <p>The reader and the Mega chat over <b>SPI</b>. Picture it as a shared conversation: <code>SCK</code> is the metronome (clock), <code>MOSI</code> is the Mega talking, <code>MISO</code> is the reader replying, and <code>SS</code> is the Mega tapping the reader on the shoulder to say &ldquo;listen up.&rdquo;</p>
+          <div class="callout sky"><span class="ic" aria-hidden="true">&#128268;</span><p style="margin:0">On a Mega, SPI lives on <b>fixed pins</b>: <code>SCK&rarr;52</code>, <code>MOSI&rarr;51</code>, <code>MISO&rarr;50</code>. We pick <code>SS&rarr;53</code> and <code>RST&rarr;5</code> ourselves. Use those exact pins and the library just works.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 3. WIRING ============== -->
+    <section id="wiring" aria-labelledby="wiring-h">
+      <p class="eyebrow">The main event</p>
+      <h2 id="wiring-h">Wiring it up, step by step</h2>
+      <p class="lead">The diagram is drawn the way it sits on your desk: <b>Mega on the left with the USB &amp; power facing away from you</b>, the <b>breadboard on the right with column&nbsp;1 at the top-left</b>. The RC522 has seven pins in a row &mdash; we'll connect each one to the matching Mega pin. Use <b>Prev / Next</b> and watch the board light up exactly what to add.</p>
+
+      <div class="wiring-grid">
+        <div class="card diagram-card">
+          <svg id="bb" viewBox="0 0 512 560" role="img" aria-label="Top-down wiring diagram: Mega 2560 on the left with USB and power facing away, RC522 RFID reader on the breadboard at the right with column 1 at the top-left.">
+            <title>RC522 RFID wiring</title>
+            <desc id="diagDesc">The diagram highlights the wire or part added at the current step.</desc>
+            <g id="bbStatic"></g>
+            <g id="bbLayers"></g>
+          </svg>
+          <div class="step-callout" id="stepCallout" aria-live="polite">Add now: place the RC522 reader on the breadboard.</div>
+          <div class="legend" aria-hidden="true">
+            <span><span class="ln" style="background:#cf3b2f"></span> 3.3V (red)</span>
+            <span><span class="ln" style="background:#222"></span> GND (black)</span>
+            <span><span class="ln" style="background:var(--c5)"></span> SPI signal</span>
+            <span><span class="ln" style="background:var(--c6)"></span> RST</span>
+            <span><span class="sq" style="background:#1f4e74"></span> RC522</span>
+          </div>
+        </div>
+
+        <div class="steps-panel" id="stepsPanel">
+          <div class="step-card" data-step="0" data-color="ground">
+            <button class="step-head" aria-expanded="true" aria-controls="sb0"><span class="badge-step" aria-hidden="true">0</span><span><span class="step-title">Place the reader</span><span class="step-sub">RC522 on the breadboard, pins in a row</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb0">
+              <p class="scaffold">The RC522's 7-pin header plugs into one half of the breadboard so each pin gets its own column to wire from.</p>
+              <ol>
+                <li>Seat the module so its <b>pin header</b> drops into rows of the <b>a&ndash;e half</b>, around <span class="col-pill">columns 1&ndash;7</span>.</li>
+                <li>From top to bottom the pins are <b>SDA, SCK, MOSI, MISO, IRQ, GND, RST, 3.3V</b> &mdash; we use all but <b>IRQ</b>.</li>
+              </ol>
+              <div class="reuse-note">No breadboard? The same wires go straight from the Mega's female jumpers onto the module's male header pins. The diagram still applies pin-for-pin.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="1" data-color="c1">
+            <button class="step-head" aria-expanded="false" aria-controls="sb1"><span class="badge-step" aria-hidden="true">1</span><span><span class="step-title">3.3V &rarr; power the reader</span><span class="step-sub">The one wire you must not get wrong</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb1">
+              <ol>
+                <li><b>Red wire:</b> Mega <span class="pin-pill">3V3</span> &rarr; the reader's <b>3.3V</b> pin (<span class="col-pill">column 7</span>).</li>
+              </ol>
+              <div class="reuse-note"><b>Double-check this one.</b> It goes to <span class="pin-pill">3V3</span>, the pin labelled 3.3&nbsp;V on the Mega &mdash; <b>not</b> the 5V pin right next to it.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="2" data-color="ground">
+            <button class="step-head" aria-expanded="false" aria-controls="sb2"><span class="badge-step" aria-hidden="true">2</span><span><span class="step-title">GND &rarr; common ground</span><span class="step-sub">Both chips share a 0V reference</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb2">
+              <ol>
+                <li><b>Black wire:</b> Mega <span class="pin-pill">GND</span> &rarr; the reader's <b>GND</b> pin (<span class="col-pill">column 6</span>).</li>
+              </ol>
+              <div class="reuse-note">Ground is the shared zero that every signal is measured against. Without it, SPI is just noise.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="3" data-color="c6">
+            <button class="step-head" aria-expanded="false" aria-controls="sb3"><span class="badge-step" aria-hidden="true">3</span><span><span class="step-title">RST &rarr; pin 5</span><span class="step-sub">The reset line</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb3">
+              <ol>
+                <li><b>Wire:</b> Mega <span class="pin-pill">pin 5</span> &rarr; the reader's <b>RST</b> pin (<span class="col-pill">column 5</span>).</li>
+              </ol>
+              <div class="reuse-note">RST lets the Arduino restart the reader cleanly when it powers up. The sketch sets this with <code>RST_PIN&nbsp;5</code>.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="4" data-color="c5">
+            <button class="step-head" aria-expanded="false" aria-controls="sb4"><span class="badge-step" aria-hidden="true">4</span><span><span class="step-title">SDA / SS &rarr; pin 53</span><span class="step-sub">&ldquo;Listen up&rdquo; chip-select</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb4">
+              <ol>
+                <li><b>Wire:</b> Mega <span class="pin-pill">pin 53</span> &rarr; the reader's <b>SDA</b> pin (<span class="col-pill">column 1</span>).</li>
+              </ol>
+              <div class="reuse-note">Confusingly labelled <b>SDA</b>, this is really SPI's <b>SS</b> (chip-select). On a Mega it pairs naturally with pin 53. The sketch calls it <code>SS_PIN&nbsp;53</code>.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="5" data-color="c5">
+            <button class="step-head" aria-expanded="false" aria-controls="sb5"><span class="badge-step" aria-hidden="true">5</span><span><span class="step-title">SCK &rarr; pin 52</span><span class="step-sub">The clock</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb5">
+              <ol>
+                <li><b>Wire:</b> Mega <span class="pin-pill">pin 52</span> &rarr; the reader's <b>SCK</b> pin (<span class="col-pill">column 2</span>).</li>
+              </ol>
+              <div class="reuse-note">SCK is the shared <b>clock</b> &mdash; the metronome both chips march to. Pin 52 is the Mega's hardware SPI clock.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="6" data-color="c5">
+            <button class="step-head" aria-expanded="false" aria-controls="sb6"><span class="badge-step" aria-hidden="true">6</span><span><span class="step-title">MOSI &rarr; pin 51</span><span class="step-sub">Mega out, reader in</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb6">
+              <ol>
+                <li><b>Wire:</b> Mega <span class="pin-pill">pin 51</span> &rarr; the reader's <b>MOSI</b> pin (<span class="col-pill">column 3</span>).</li>
+              </ol>
+              <div class="reuse-note"><b>M</b>aster <b>O</b>ut <b>S</b>lave <b>I</b>n &mdash; the line the Mega talks on. Pin 51 is the Mega's hardware MOSI.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="7" data-color="c5">
+            <button class="step-head" aria-expanded="false" aria-controls="sb7"><span class="badge-step" aria-hidden="true">7</span><span><span class="step-title">MISO &rarr; pin 50</span><span class="step-sub">Reader out, Mega in</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb7">
+              <ol>
+                <li><b>Wire:</b> Mega <span class="pin-pill">pin 50</span> &rarr; the reader's <b>MISO</b> pin (<span class="col-pill">column 4</span>).</li>
+              </ol>
+              <div class="count-check win-chip"><span aria-hidden="true">&#127881;</span> All seven wired! Power (3V3), ground, reset, and the four SPI lines. Time to upload.</div>
+            </div>
+          </div>
+
+          <div class="step-controls">
+            <button class="btn" id="prevStep">&larr; Prev</button>
+            <div class="step-dots" id="stepDots" role="tablist" aria-label="Wiring steps"></div>
+            <button class="btn primary" id="nextStep">Next &rarr;</button>
+          </div>
+          <div class="callout" style="margin-top:var(--sp-2)"><span class="ic" aria-hidden="true">&#9989;</span><p style="margin:0"><b>Two golden rules:</b> the reader's power pin goes to <b>3V3</b>, never 5V &middot; the three SPI lines (<b>SCK 52, MOSI 51, MISO 50</b>) are fixed hardware pins on the Mega &mdash; use exactly those and the library handles the rest.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 4. CODE ============== -->
+    <section id="code" aria-labelledby="code-h">
+      <p class="eyebrow">The brains</p>
+      <h2 id="code-h">The code, line by line</h2>
+      <p class="lead">It's already saved at <code>sketches\32_RC522_RFID</code>. The <code>MFRC522</code> library does the radio heavy lifting; your loop just asks two questions &mdash; <b>is a card here?</b> and <b>can I read it?</b> &mdash; then prints the UID byte by byte.</p>
+      <div class="code-shell">
+        <div class="codecard">
+          <div class="codebar"><span class="traffic" aria-hidden="true"><i style="background:#e0473b"></i><i style="background:#f1b500"></i><i style="background:#2faa55"></i></span><span class="fname">32_RC522_RFID.ino</span><button class="copybtn" id="copyCode" type="button">Copy</button></div>
+          <pre class="code" id="codeBlock" tabindex="0" aria-label="Arduino sketch source code"></pre>
+        </div>
+        <div class="explain">
+          <div class="explain-item star"><h4>#include &mdash; borrow two libraries</h4><p><code>SPI.h</code> drives the four-wire bus; <code>MFRC522.h</code> knows how to speak to this exact reader chip. They turn pages of radio code into a few friendly calls.</p></div>
+          <div class="explain-item star"><h4>setup() &mdash; wake everything up</h4><p><code>SPI.begin()</code> starts the bus, <code>rfid.PCD_Init()</code> boots the reader, and <code>Serial.begin(9600)</code> opens the monitor link. Then it prints <code>RC522 ready - tap a card or fob.</code></p></div>
+          <div class="explain-item star"><h4>The two gatekeeper questions</h4><p><code>PICC_IsNewCardPresent()</code> asks &ldquo;is something on the reader?&rdquo; and <code>PICC_ReadCardSerial()</code> asks &ldquo;can I read its UID?&rdquo; If either answers no, <code>return</code> bails and the loop tries again &mdash; thousands of times a second.</p></div>
+          <div class="explain-item"><h4>Printing the UID, one byte at a time</h4><p>The <code>for</code> loop walks each byte of <code>rfid.uid</code>, prints a leading <code>0</code> for small values so every byte is two digits, and shows it in <code>HEX</code>. <code>PICC_HaltA()</code> then tells the card &ldquo;we're done&rdquo; so one tap is one read.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 5. UPLOAD ============== -->
+    <section id="upload" aria-labelledby="upload-h">
+      <p class="eyebrow">Send it to the board</p>
+      <h2 id="upload-h">Upload &amp; open the monitor</h2>
+      <p class="lead">The <code>MFRC522</code> library is already installed. Plug the Mega in. From the project root in PowerShell, upload, then open the serial monitor to watch cards appear:</p>
+      <div class="card">
+        <div class="cmd"><span class="prompt" aria-hidden="true">PS&gt;</span><code id="uploadCmd">.\scripts\upload.ps1 32_RC522_RFID</code><button class="copybtn" id="copyCmd" type="button">Copy</button></div>
+        <div class="cmd" style="margin-top:var(--sp-2)"><span class="prompt" aria-hidden="true">PS&gt;</span><code id="monitorCmd">.\scripts\monitor.ps1</code><button class="copybtn" id="copyMon" type="button">Copy</button></div>
+        <p style="margin:var(--sp-3) 0 0;font-size:var(--step--1);color:var(--ink-soft)">In the Claude chat you can run either line by prefixing it with <code style="background:var(--cream-2);padding:.05em .4em;border-radius:5px">!&nbsp;</code>. The monitor runs at <b>9600 baud</b> &mdash; press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop it.</p>
+        <div class="success-box">
+          <b style="color:var(--go-d)">&#10003; What success looks like</b>
+          <p style="margin:.4rem 0 0;font-size:var(--step--1);color:var(--ink-soft)">Upload ends with <b>done uploading</b>, the monitor greets you, and each tap prints that tag's UID:</p>
+          <pre>done uploading 32_RC522_RFID
+RC522 ready - tap a card or fob.
+card UID: A1 B2 C3 D4
+card UID: 7F 0C 22 91</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 6. SEE IT RUN ============== -->
+    <section id="run" aria-labelledby="run-h">
+      <p class="eyebrow">Preview</p>
+      <h2 id="run-h">See it run</h2>
+      <p class="lead">Tap the <b>card</b> or the <b>fob</b> below. Watch three things move together: the <b>card slides onto the reader</b> and the coil flashes, the <b>line of code</b> running on the board lights up, and the <b>serial monitor</b> prints that tag's UID &mdash; exactly what <code>.\scripts\monitor.ps1</code> shows.</p>
+      <div class="run-grid">
+        <div class="stage">
+          <div class="reader" id="reader">
+            <div class="wave" aria-hidden="true"></div>
+            <div class="coil" aria-hidden="true"></div>
+            <span class="rlab">RC522</span>
+            <div class="card-token" id="cardToken"><span class="chip" aria-hidden="true"></span><span id="tokenLabel">CARD</span></div>
+          </div>
+          <div class="tap-row">
+            <button class="tapbtn card" id="tapCard" type="button">Tap card</button>
+            <button class="tapbtn fob" id="tapFob" type="button">Tap fob</button>
+          </div>
+          <span class="press-hint">tap a tag to read its UID</span>
+        </div>
+        <div class="run-panel">
+          <div class="readouts">
+            <div class="ro"><span class="lbl">card present?</span><span class="val lo" id="roPresent">waiting</span></div>
+            <div class="ro"><span class="lbl">last UID</span><span class="val" id="roUid">--</span></div>
+          </div>
+          <div class="mini-code">
+            <div class="mbar">loop() &mdash; running on the board</div>
+            <pre class="mini" id="miniCode"></pre>
+          </div>
+          <div class="serial">
+            <div class="sbar"><span class="dot" aria-hidden="true"></span><span class="stitle">COM5 &middot; 9600 baud</span><span class="scmd">monitor.ps1</span></div>
+            <pre id="serialOut" aria-live="polite" aria-label="Simulated serial monitor output"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 7. TROUBLESHOOTING ============== -->
+    <section id="trouble" aria-labelledby="trouble-h">
+      <p class="eyebrow">When something's off</p>
+      <h2 id="trouble-h">Troubleshooting</h2>
+      <p class="lead">Almost every &ldquo;it's broken!&rdquo; is one of these &mdash; and the serial monitor usually tells you which.</p>
+      <div class="trouble">
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#128268;</span> The monitor prints the greeting but never sees a card<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>You see <code>RC522 ready - tap a card or fob.</code> but tapping does nothing. Usually one of the SPI wires is on the wrong pin, or power is missing.</p><div class="fix"><b>Fix:</b> Re-check the four SPI lines against the diagram: <code>SDA&rarr;53</code>, <code>SCK&rarr;52</code>, <code>MOSI&rarr;51</code>, <code>MISO&rarr;50</code>, plus <code>RST&rarr;5</code>. Hold the card flat against the coil for a moment.</div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#9888;</span> Nothing prints at all &mdash; not even the greeting<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>The reader probably isn't powered (or got 5V and is unhappy). The <code>PCD_Init()</code> line runs once at startup, so no greeting means the sketch may be stalling on the dead reader.</p><div class="fix"><b>Fix:</b> Confirm power goes to <b>3V3</b> (not 5V) and <code>GND</code> reaches the reader's GND. Unplug, re-seat the power wires, and re-upload.</div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#129514;</span> The monitor is blank or shows gibberish<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>No text, or random symbols scrolling by.</p><div class="fix"><b>Fix:</b> The sketch prints at <b>9600 baud</b>, so run <code>.\scripts\monitor.ps1</code> (it defaults to 9600). If another monitor is open, close it &mdash; only one program can use the port.</div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#128221;</span> Compile error: <code>MFRC522.h: No such file</code><span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>The upload fails before it starts because the library isn't found.</p><div class="fix"><b>Fix:</b> Install it with <code>.\scripts\install-libs.ps1</code>, then upload again. The library is what teaches the Arduino to speak RC522.</div></div></details>
+      </div>
+    </section>
+
+    <!-- ============== 8. CHALLENGE ============== -->
+    <section id="challenge" aria-labelledby="challenge-h">
+      <p class="eyebrow">Level up</p>
+      <h2 id="challenge-h">Challenge &amp; extend</h2>
+      <p class="lead">Got UIDs printing? Try one of these &mdash; small code tweaks, big payoff. Re-upload with the same command after each change.</p>
+      <div class="challenge-grid">
+        <div class="ch-card"><span class="ch-tag">Easy</span><h3>Greet a known card</h3><p>Save one card's UID and say hello when it taps. Print the bytes once, copy them, then compare:</p><pre><span class="cm">// after reading the UID:</span>
+if (rfid.uid.uidByte[0] == 0xA1 &amp;&amp;
+    rfid.uid.uidByte[1] == 0xB2) {
+  Serial.println("Welcome back!");
+}</pre><p style="margin:0">Now your reader knows <em>your</em> card from any other.</p></div>
+        <div class="ch-card"><span class="ch-tag">A step further</span><h3>Light an &ldquo;access granted&rdquo; LED</h3><p>Add an LED on pin 8. Flash it green for an approved card, and you've built the core of a door lock:</p><pre><span class="cm">// in setup():</span>
+pinMode(8, OUTPUT);
+
+<span class="cm">// when the UID matches:</span>
+digitalWrite(8, HIGH);
+delay(800);
+digitalWrite(8, LOW);</pre><p style="margin:0">Swap the LED for a relay and it could open a real latch.</p></div>
+      </div>
+      <div class="finish"><div class="conf" aria-hidden="true">&#127881;</div><h2>You built a card reader!</h2><p style="margin:0 auto;max-width:54ch;color:var(--ink-soft)">You wired a real SPI device, respected its 3.3&nbsp;V power, leaned on a library to handle the radio, and read a unique UID off a battery-less tag &mdash; while the serial monitor named every card. This is the beating heart of badges, hotel keys, and contactless payments. Onward!</p></div>
+    </section>
+
+    <footer>Project 32 &middot; RC522 RFID reader &middot; Inland / Keyestudio Mega 2560 R3 &middot; works fully offline</footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+
+  /* ============================================================
+     PORTRAIT DIAGRAM ENGINE  (shared across all guides)
+     Bench orientation: Mega LEFT (USB up), breadboard RIGHT,
+     column 1 at the TOP-LEFT, columns counting DOWN, rows a-e | f-j
+     running left->right, +/- rails vertical on the outer edges.
+     ============================================================ */
+  var COL_TOP = 96, DY = 30;                 // y of column 1, spacing downward
+  function colY(c){ return COL_TOP + (c - 1) * DY; }
+  var ROWX = { a:262, b:281, c:300, d:319, e:338, f:376, g:395, h:414, i:433, j:452 };
+  var RAIL = { plus:212, minus:230 };        // left rail pair x (the one we use)
+  var RRAIL = { minus:476, plus:492 };       // right rail pair x (drawn, idle)
+  var PORT_X = 174;                          // Mega right edge (pins face the board)
+  var BOARD_COLS = 11;                       // how many columns to draw
+
+  // Mega pin ports exposed on the right edge, top -> bottom
+  var PORTS = {
+    "D53": { y:120, color:"#e0473b", label:"53"  },
+    "D52": { y:160, color:"#e8821e", label:"52"  },
+    "D51": { y:200, color:"#f1b500", label:"51"  },
+    "D50": { y:240, color:"#2faa55", label:"50"  },
+    "D5":  { y:300, color:"#7a5cc8", label:"5"   },
+    "3V3": { y:360, color:"#cf3b2f", label:"3V3" },
+    "GND": { y:400, color:"#222",    label:"GND" }
+  };
+
+  /* order the Mega's right-edge ports to match the real board layout:
+     power at top, GND, then digital pins DESCENDING (13..2), analog at bottom.
+     Prevents the wire-crossing you get when pin 2 is drawn above pin 8. */
+  (function orderPorts(){
+    function rank(k){
+      if (k==="5V") return 0;
+      if (k==="3V3"||k==="3.3V"||k==="3V") return 1;
+      if (k==="VIN") return 2;
+      if (k==="GND") return 3;
+      if (k.charAt(0)==="A") return 1000 + parseInt(k.slice(1),10);      // analog -> bottom
+      var d = (k.charAt(0)==="D") ? k.slice(1) : k;
+      var n = parseInt(d,10);
+      if (!isNaN(n)) return 100 - n;                                    // digital -> descending
+      return 500;
+    }
+    var keys = Object.keys(PORTS);
+    var ys = keys.map(function(k){ return PORTS[k].y; }).sort(function(a,b){ return a-b; });
+    keys.slice().sort(function(a,b){ return rank(a)-rank(b); })
+        .forEach(function(k,i){ PORTS[k].y = ys[i]; });
+  })();
+
+
+  function E(tag, attrs){
+    var n = document.createElementNS(NS, tag), k;
+    for (k in attrs) if (attrs.hasOwnProperty(k)) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+  function dot(g, x, y, color, r){ g.appendChild(E("circle", { cx:x, cy:y, r:(r||3.4), fill:color })); }
+  function poly(g, pts, color, w){
+    g.appendChild(E("polyline", { points:pts, fill:"none", stroke:color, "stroke-width":(w||3.2),
+      "stroke-linecap":"round", "stroke-linejoin":"round" }));
+  }
+
+  /* ---- static scaffold: Mega + breadboard + rails + holes ---- */
+  (function buildStatic(){
+    var g = document.getElementById("bbStatic");
+    var gridBottom = colY(BOARD_COLS) + 14;
+
+    // ===== Arduino Mega (left, vertical, USB + power at the TOP / away) =====
+    g.appendChild(E("rect", { x:24, y:70, width:150, height:gridBottom-70+10, rx:9, fill:"#0b6b3a", stroke:"#085029", "stroke-width":1.5 }));
+    // USB connector sticking UP (away from viewer)
+    g.appendChild(E("rect", { x:40, y:36, width:46, height:40, rx:4, fill:"#b9c0c4", stroke:"#8a9094" }));
+    g.appendChild(E("rect", { x:46, y:30, width:34, height:12, rx:2, fill:"#cdd3d6" }));
+    // DC barrel jack, also at the top
+    g.appendChild(E("rect", { x:104, y:40, width:40, height:34, rx:6, fill:"#15110c", stroke:"#000" }));
+    g.appendChild(E("circle", { cx:124, cy:57, r:7, fill:"#3a3027" }));
+    // labels
+    var t = E("text", { x:99, y:300, fill:"#cdeedd", "font-family":"monospace", "font-size":13, "font-weight":700, "text-anchor":"middle", transform:"rotate(-90 99 300)" }); t.textContent = "MEGA 2560"; g.appendChild(t);
+    var away = E("text", { x:99, y:22, fill:"#9bb0a4", "font-family":"monospace", "font-size":9, "font-weight":700, "text-anchor":"middle" }); away.textContent = "USB / POWER  (facing away)"; g.appendChild(away);
+    // pin ports on the right edge
+    Object.keys(PORTS).forEach(function(key){
+      var p = PORTS[key];
+      g.appendChild(E("rect", { x:158, y:p.y-9, width:18, height:18, rx:3, fill:"#0a5a31" }));
+      g.appendChild(E("circle", { id:"port_"+key, cx:PORT_X, cy:p.y, r:3.6, fill:"#e9c46a" }));
+      var lab = E("text", { x:150, y:p.y+4, fill:"#cdeedd", "font-family":"monospace", "font-size":10, "font-weight":800, "text-anchor":"end" }); lab.textContent = p.label; g.appendChild(lab);
+    });
+
+    // ===== Breadboard body =====
+    g.appendChild(E("rect", { x:198, y:70, width:308, height:gridBottom-70+10, rx:10, fill:"#f3ecdb", stroke:"#d6c8a6", "stroke-width":1.5 }));
+    // centre trough (vertical)
+    g.appendChild(E("rect", { x:352, y:84, width:20, height:gridBottom-84, fill:"#e7dcc1" }));
+    g.appendChild(E("line", { x1:362, y1:84, x2:362, y2:gridBottom, stroke:"#cdbf9c", "stroke-width":1, "stroke-dasharray":"3 3" }));
+
+    // rails (vertical): left + / - and right - / +
+    function rail(x, color){ g.appendChild(E("line", { x1:x, y1:84, x2:x, y2:gridBottom, stroke:color, "stroke-width":2 })); }
+    rail(RAIL.plus, "#cf3b2f"); rail(RAIL.minus, "#2f6f9e");
+    rail(RRAIL.minus, "#bcd0e0"); rail(RRAIL.plus, "#e8b6b0");
+    g.appendChild(E("text", { x:RAIL.plus, y:80, fill:"#cf3b2f", "font-family":"monospace", "font-size":11, "font-weight":800, "text-anchor":"middle" })).textContent = "+";
+    g.appendChild(E("text", { x:RAIL.minus, y:80, fill:"#2f6f9e", "font-family":"monospace", "font-size":11, "font-weight":800, "text-anchor":"middle" })).textContent = "−";
+
+    // row letters across the top
+    var rows = ["a","b","c","d","e","f","g","h","i","j"];
+    rows.forEach(function(r){
+      var t2 = E("text", { x:ROWX[r], y:80, fill:"#a8997a", "font-family":"monospace", "font-size":9, "text-anchor":"middle" }); t2.textContent = r; g.appendChild(t2);
+    });
+
+    // hole grid + rail holes + column numbers
+    for (var c = 1; c <= BOARD_COLS; c++){
+      var y = colY(c);
+      rows.forEach(function(r){
+        g.appendChild(E("circle", { cx:ROWX[r], cy:y, r:1.9, fill:"#cdbf9c" }));
+      });
+      // rail holes (left + right)
+      [RAIL.plus, RAIL.minus, RRAIL.minus, RRAIL.plus].forEach(function(rx){
+        g.appendChild(E("circle", { cx:rx, cy:y, r:1.7, fill:"#b7c6d2" }));
+      });
+      // column number every 5 (and column 1)
+      if (c === 1 || c % 5 === 0){
+        var cn = E("text", { x:248, y:y+3, fill:"#9c7a44", "font-family":"monospace", "font-size":8.5, "font-weight":800, "text-anchor":"end" }); cn.textContent = c; g.appendChild(cn);
+      }
+    }
+    // "1" call-out at the very top-left so orientation is unmistakable
+    var one = E("text", { x:248, y:colY(1)+3, fill:"#b56712", "font-family":"monospace", "font-size":10, "font-weight":900, "text-anchor":"end" }); one.textContent = "1"; g.appendChild(one);
+  })();
+
+  /* ---- drawing primitives (operate on a step layer <g>) ---- */
+  function portToRail(g, portKey, railX, atCol, color){
+    var p = PORTS[portKey], y = colY(atCol);
+    poly(g, PORT_X+" "+p.y+" "+railX+" "+p.y+" "+railX+" "+y, color, 3.4);
+    dot(g, PORT_X, p.y, color); dot(g, railX, y, color);
+  }
+  function railToHole(g, railX, col, row, color){
+    var y = colY(col), x = ROWX[row];
+    poly(g, railX+" "+y+" "+x+" "+y, color, 3.2);
+    dot(g, railX, y, color); dot(g, x, y, color);
+  }
+  function portToHole(g, portKey, col, row, color){
+    var p = PORTS[portKey], y = colY(col), x = ROWX[row];
+    poly(g, PORT_X+" "+p.y+" "+x+" "+p.y+" "+x+" "+y, color, 3.2);
+    dot(g, PORT_X, p.y, color); dot(g, x, y, color);
+  }
+  function resistorToRail(g, col, row, railX, bands){
+    var y = colY(col), x1 = ROWX[row], x0 = railX, mid = (x0 + x1) / 2;
+    g.appendChild(E("line", { x1:x0, y1:y, x2:x1, y2:y, stroke:"#9a8050", "stroke-width":2 }));
+    g.appendChild(E("rect", { x:mid-12, y:y-6, width:24, height:12, rx:5, fill:"#c9a36b", stroke:"#9c7a44" }));
+    (bands||["#c0392b","#c0392b","#5b3a1e","#d4af37"]).forEach(function(cc, i){
+      g.appendChild(E("rect", { x:(mid-8)+i*4.2, y:y-6, width:1.9, height:12, fill:cc }));
+    });
+    dot(g, x0, y, "#9a8050"); dot(g, x1, y, "#9a8050");
+  }
+  function led(g, colPlus, colMinus, row, body, edge){
+    var x = ROWX[row], yp = colY(colPlus), ym = colY(colMinus), mid = (yp+ym)/2;
+    g.appendChild(E("line", { x1:x, y1:yp, x2:x, y2:mid, stroke:body, "stroke-width":2.6 }));      // long (+)
+    g.appendChild(E("line", { x1:x, y1:ym, x2:x, y2:mid, stroke:"#9a9387", "stroke-width":2.6 }));  // short (-)
+    g.appendChild(E("ellipse", { cx:x+9, cy:mid, rx:11, ry:10, fill:body, stroke:edge, "stroke-width":1.4 }));
+    g.appendChild(E("ellipse", { cx:x+5, cy:mid-3, rx:3, ry:2.5, fill:"#fff", opacity:.55 }));
+    var pl = E("text", { x:x-7, y:yp+3, fill:edge, "font-size":7.5, "font-weight":800, "font-family":"monospace", "text-anchor":"end" }); pl.textContent="+"; g.appendChild(pl);
+    var ml = E("text", { x:x-7, y:ym+3, fill:"#6f6a60", "font-size":7.5, "font-weight":800, "font-family":"monospace", "text-anchor":"end" }); ml.textContent="−"; g.appendChild(ml);
+    dot(g, x, yp, body); dot(g, x, ym, "#9a9387");
+  }
+
+  /* ---- RC522 reader module: a labelled block with 7 pin stubs + coil ---- */
+  // Pins land in rows a..e? No — the 7-pin header sits in column rows 1..7, row 'a'.
+  // We draw the block body over rows b..e (to the right of the header holes),
+  // a stub from each column's row-'a' hole into the block, and an antenna-coil hint.
+  var RC_PINS = [
+    { col:1, key:"SDA",  color:"#2f8fc0" },
+    { col:2, key:"SCK",  color:"#2f8fc0" },
+    { col:3, key:"MOSI", color:"#2f8fc0" },
+    { col:4, key:"MISO", color:"#2f8fc0" },
+    { col:5, key:"RST",  color:"#7a5cc8" },
+    { col:6, key:"GND",  color:"#222"    },
+    { col:7, key:"3V3",  color:"#cf3b2f" }
+  ];
+  function rc522Module(g){
+    var xHole = ROWX.a;                       // header sits in the 'a' column holes
+    var xBody0 = ROWX.b - 4, xBody1 = ROWX.j + 10;
+    var yTop = colY(1) - 13, yBot = colY(7) + 13;
+    // body
+    g.appendChild(E("rect", { x:xBody0, y:yTop, width:xBody1-xBody0, height:yBot-yTop, rx:8, fill:"#1f4e74", stroke:"#13344e", "stroke-width":1.5 }));
+    // antenna coil hint (concentric rounded rects toward the far side)
+    var cx = (ROWX.h+ROWX.j)/2, cy = (yTop+yBot)/2;
+    [[40,64],[28,46],[16,28]].forEach(function(d){
+      g.appendChild(E("rect", { x:cx-d[0]/2, y:cy-d[1]/2, width:d[0], height:d[1], rx:6, fill:"none", stroke:"#7fc0ec", "stroke-width":1.6, opacity:.75 }));
+    });
+    var ct = E("text", { x:cx, y:cy+3, fill:"#bfe0f6", "font-family":"monospace", "font-size":8, "font-weight":700, "text-anchor":"middle" }); ct.textContent="coil"; g.appendChild(ct);
+    // module title
+    var mt = E("text", { x:ROWX.d, y:yTop+13, fill:"#dff0fb", "font-family":"monospace", "font-size":10, "font-weight":800, "text-anchor":"middle" }); mt.textContent="RC522"; g.appendChild(mt);
+    // 7 pin stubs: from the 'a' hole into the block, each labelled
+    RC_PINS.forEach(function(pin){
+      var y = colY(pin.col);
+      g.appendChild(E("line", { x1:xHole, y1:y, x2:xBody0, y2:y, stroke:"#c9b27a", "stroke-width":2 }));
+      g.appendChild(E("circle", { cx:xHole, cy:y, r:2.6, fill:"#e9c46a" }));
+      g.appendChild(E("circle", { cx:xBody0, cy:y, r:2.4, fill:"#9fc6e4" }));
+      var lab = E("text", { x:xBody0+6, y:y+3, fill:"#dff0fb", "font-family":"monospace", "font-size":8, "font-weight":800, "text-anchor":"start" });
+      lab.textContent = pin.key; g.appendChild(lab);
+    });
+  }
+
+  /* ---- build the wiring step layers (RC522-specific) ---- */
+  (function buildLayers(){
+    var host = document.getElementById("bbLayers");
+    function layer(i){ var g = E("g", { "class":"layer", "data-layer":i }); host.appendChild(g); return g; }
+
+    var g0 = layer(0); rc522Module(g0);                      // place the reader
+
+    var g1 = layer(1); portToHole(g1, "3V3", 7, "a", "#cf3b2f");  // 3.3V power
+    var g2 = layer(2); portToHole(g2, "GND", 6, "a", "#222");     // ground
+    var g3 = layer(3); portToHole(g3, "D5",  5, "a", "#7a5cc8");  // RST -> pin 5
+    var g4 = layer(4); portToHole(g4, "D53", 1, "a", "#e0473b");  // SDA/SS -> pin 53
+    var g5 = layer(5); portToHole(g5, "D52", 2, "a", "#e8821e");  // SCK -> pin 52
+    var g6 = layer(6); portToHole(g6, "D51", 3, "a", "#f1b500");  // MOSI -> pin 51
+    var g7 = layer(7); portToHole(g7, "D50", 4, "a", "#2faa55");  // MISO -> pin 50
+  })();
+
+  /* ============================================================
+     Wiring step machine (progressive reveal)
+     ============================================================ */
+  var layers = [].slice.call(document.querySelectorAll("#bb .layer"));
+  var stepCards = [].slice.call(document.querySelectorAll(".step-card"));
+  var heads = [].slice.call(document.querySelectorAll(".step-head"));
+  var prevBtn = document.getElementById("prevStep"), nextBtn = document.getElementById("nextStep");
+  var dotsWrap = document.getElementById("stepDots"), diagDesc = document.getElementById("diagDesc");
+  var stepCallout = document.getElementById("stepCallout");
+  var stepNames = ["Place reader","3.3V power","Ground","RST to pin 5","SDA/SS to pin 53","SCK to pin 52","MOSI to pin 51","MISO to pin 50"];
+  var callouts = [
+    "Add now: seat the RC522 reader on the breadboard, header in columns 1-7.",
+    "Add now: red wire from Mega 3V3 to the reader's 3.3V pin (column 7).",
+    "Add now: black wire from Mega GND to the reader's GND pin (column 6).",
+    "Add now: wire from Mega pin 5 to the reader's RST pin (column 5).",
+    "Add now: wire from Mega pin 53 to the reader's SDA/SS pin (column 1).",
+    "Add now: wire from Mega pin 52 to the reader's SCK pin (column 2).",
+    "Add now: wire from Mega pin 51 to the reader's MOSI pin (column 3).",
+    "Add now: wire from Mega pin 50 to the reader's MISO pin (column 4)."
+  ];
+  var TOTAL = 8, current = 0, dots = [];
+  for (var i = 0; i < TOTAL; i++){
+    (function(idx){
+      var b = document.createElement("button");
+      b.type = "button"; b.setAttribute("role","tab");
+      b.setAttribute("aria-label","Go to step "+idx+": "+stepNames[idx]);
+      b.addEventListener("click", function(){ goStep(idx, {scroll:true}); });
+      dotsWrap.appendChild(b); dots.push(b);
+    })(i);
+  }
+  function applyLayers(){
+    layers.forEach(function(L){
+      var n = parseInt(L.getAttribute("data-layer"),10);
+      L.style.transition = "opacity .3s ease";
+      if (n === current){ L.style.opacity = "1"; L.style.filter = "drop-shadow(0 2px 5px rgba(0,0,0,.22))"; }
+      else if (n < current){ L.style.opacity = "0.45"; L.style.filter = "none"; }
+      else { L.style.opacity = "0"; L.style.filter = "none"; }
+    });
+    Object.keys(PORTS).forEach(function(k){
+      var p = document.getElementById("port_"+k); if (!p) return;
+      p.setAttribute("r","3.6"); p.style.filter = "none";
+    });
+  }
+  function setCards(){
+    stepCards.forEach(function(card){
+      var n = parseInt(card.getAttribute("data-step"),10), active = (n === current);
+      card.classList.toggle("is-active", active);
+      var h = card.querySelector(".step-head"); if (h) h.setAttribute("aria-expanded", active?"true":"false");
+    });
+    dots.forEach(function(d, idx){ d.setAttribute("aria-current", idx===current?"true":"false"); });
+    prevBtn.disabled = (current === 0);
+    nextBtn.disabled = (current === TOTAL-1);
+    nextBtn.innerHTML = (current === TOTAL-1) ? "All wired ✓" : "Next →";
+    if (diagDesc) diagDesc.textContent = "Step "+current+": "+stepNames[current]+".";
+    if (stepCallout) stepCallout.textContent = callouts[current];
+  }
+  function goStep(n, opts){
+    current = Math.max(0, Math.min(TOTAL-1, n));
+    applyLayers(); setCards();
+    if (opts && opts.scroll && stepCards[current]) stepCards[current].scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+  prevBtn.addEventListener("click", function(){ goStep(current-1, {scroll:true}); });
+  nextBtn.addEventListener("click", function(){ goStep(current+1, {scroll:true}); });
+  heads.forEach(function(h){ h.addEventListener("click", function(){ goStep(parseInt(h.closest(".step-card").getAttribute("data-step"),10)); }); });
+  document.getElementById("stepsPanel").addEventListener("keydown", function(e){
+    if (e.key==="ArrowRight"||e.key==="ArrowDown"){ e.preventDefault(); goStep(current+1); }
+    else if (e.key==="ArrowLeft"||e.key==="ArrowUp"){ e.preventDefault(); goStep(current-1); }
+  });
+  goStep(0);
+
+  /* ============================================================
+     CODE block + code-follower
+     Each line is an array entry; {h:html, id:tag} so the sim can
+     highlight the line(s) currently running on the board.
+     ============================================================ */
+  var CODE = [
+    {h:'<span class="cm">// 32_RC522_RFID - read an RFID card/fob UID over SPI</span>'},
+    {h:'<span class="kw">#include</span> <span class="str">&lt;SPI.h&gt;</span>'},
+    {h:'<span class="kw">#include</span> <span class="str">&lt;MFRC522.h&gt;</span>'},
+    {h:''},
+    {h:'<span class="kw">#define</span> <span class="id">SS_PIN</span>  <span class="num">53</span>'},
+    {h:'<span class="kw">#define</span> <span class="id">RST_PIN</span> <span class="num">5</span>'},
+    {h:''},
+    {h:'<span class="id">MFRC522</span> <span class="id">rfid</span>(<span class="id">SS_PIN</span>, <span class="id">RST_PIN</span>);'},
+    {h:''},
+    {h:'<span class="kw">void</span> <span class="fn">setup</span>() {', id:"setup"},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);', id:"setup"},
+    {h:'  <span class="fn">SPI</span>.<span class="fn">begin</span>();', id:"setup"},
+    {h:'  <span class="id">rfid</span>.<span class="fn">PCD_Init</span>();', id:"setup"},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"RC522 ready - tap a card or fob."</span>);', id:"setup"},
+    {h:'}'},
+    {h:''},
+    {h:'<span class="kw">void</span> <span class="fn">loop</span>() {'},
+    {h:'  <span class="kw">if</span> (!<span class="id">rfid</span>.<span class="fn">PICC_IsNewCardPresent</span>()) <span class="kw">return</span>;   <span class="cm">// nothing on the reader</span>', id:"present"},
+    {h:'  <span class="kw">if</span> (!<span class="id">rfid</span>.<span class="fn">PICC_ReadCardSerial</span>())  <span class="kw">return</span>;    <span class="cm">// couldn\'t read it</span>', id:"read"},
+    {h:''},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"card UID:"</span>);', id:"print"},
+    {h:'  <span class="kw">for</span> (<span class="kw">byte</span> <span class="id">i</span> = <span class="num">0</span>; <span class="id">i</span> &lt; <span class="id">rfid</span>.<span class="id">uid</span>.<span class="id">size</span>; <span class="id">i</span>++) {', id:"print"},
+    {h:'    <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">\' \'</span>);', id:"print"},
+    {h:'    <span class="kw">if</span> (<span class="id">rfid</span>.<span class="id">uid</span>.<span class="id">uidByte</span>[<span class="id">i</span>] &lt; <span class="num">0x10</span>) <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">\'0\'</span>);', id:"print"},
+    {h:'    <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="id">rfid</span>.<span class="id">uid</span>.<span class="id">uidByte</span>[<span class="id">i</span>], <span class="kw">HEX</span>);', id:"print"},
+    {h:'  }'},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">println</span>();', id:"print"},
+    {h:''},
+    {h:'  <span class="id">rfid</span>.<span class="fn">PICC_HaltA</span>();                           <span class="cm">// stop reading this card</span>', id:"halt"},
+    {h:'  <span class="fn">delay</span>(<span class="num">500</span>);', id:"halt"},
+    {h:'}'}
+  ];
+  function renderCode(host, miniHost){
+    host.innerHTML = "";
+    CODE.forEach(function(ln){
+      var s = document.createElement("span");
+      s.className = "cl"; if (ln.id) s.setAttribute("data-id", ln.id);
+      s.innerHTML = ln.h || "&nbsp;";
+      host.appendChild(s);
+    });
+    // mini code = the loop body (ids present/read/print/halt)
+    miniHost.innerHTML = "";
+    var MINI = [
+      {h:'<span class="kw">if</span> (!<span class="fn">PICC_IsNewCardPresent</span>()) <span class="kw">return</span>;', id:"present"},
+      {h:'<span class="kw">if</span> (!<span class="fn">PICC_ReadCardSerial</span>())  <span class="kw">return</span>;', id:"read"},
+      {h:'<span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"card UID:"</span>);', id:"print"},
+      {h:'<span class="kw">for</span> (... <span class="fn">print</span> each byte ...) ;', id:"print"},
+      {h:'<span class="fn">PICC_HaltA</span>(); <span class="fn">delay</span>(<span class="num">500</span>);', id:"halt"}
+    ];
+    MINI.forEach(function(ln){
+      var s = document.createElement("span"); s.className="cl"; s.setAttribute("data-id", ln.id);
+      s.innerHTML = ln.h; miniHost.appendChild(s);
+    });
+  }
+  var codeBlock = document.getElementById("codeBlock");
+  var miniCode = document.getElementById("miniCode");
+  renderCode(codeBlock, miniCode);
+
+  function highlight(id){
+    [codeBlock, miniCode].forEach(function(host){
+      [].forEach.call(host.querySelectorAll(".cl"), function(s){
+        s.classList.toggle("active", !!id && s.getAttribute("data-id") === id);
+      });
+    });
+  }
+
+  /* ============================================================
+     Serial monitor pane
+     ============================================================ */
+  var serialOut = document.getElementById("serialOut");
+  function serialLine(text, muted){
+    var s = document.createElement("span");
+    s.className = "new" + (muted ? " muted" : "");
+    s.textContent = text + "\n";
+    serialOut.appendChild(s);
+    while (serialOut.childNodes.length > 60) serialOut.removeChild(serialOut.firstChild);
+    serialOut.scrollTop = serialOut.scrollHeight;
+    setTimeout(function(){ s.className = muted ? "muted" : ""; }, 500);
+  }
+  serialLine("RC522 ready - tap a card or fob.", true);
+
+  /* ============================================================
+     Interactive RFID simulation (tap card / tap fob)
+     ============================================================ */
+  var reader = document.getElementById("reader");
+  var cardToken = document.getElementById("cardToken");
+  var tokenLabel = document.getElementById("tokenLabel");
+  var heroLed = document.getElementById("heroLed");
+  var tapCard = document.getElementById("tapCard"), tapFob = document.getElementById("tapFob");
+  var roPresent = document.getElementById("roPresent"), roUid = document.getElementById("roUid");
+  var busy = false;
+
+  function tap(kind){
+    if (busy) return;
+    busy = true;
+    var uid = (kind === "fob") ? "7F 0C 22 91" : "A1 B2 C3 D4";
+    // set up the token visual
+    cardToken.classList.toggle("fob", kind === "fob");
+    tokenLabel.textContent = (kind === "fob") ? "FOB" : "CARD";
+    cardToken.classList.remove("show");
+    // force reflow so the slide-in animates each time
+    void cardToken.offsetWidth;
+
+    roPresent.textContent = "reading...";
+    roPresent.className = "val lo";
+    highlight("present");
+
+    setTimeout(function(){
+      cardToken.classList.add("show");
+      reader.classList.add("lit");
+      if (heroLed) heroLed.classList.add("on");
+      roPresent.textContent = "YES";
+      roPresent.className = "val hi";
+      highlight("read");
+    }, 120);
+
+    setTimeout(function(){
+      highlight("print");
+      serialLine("card UID: " + uid);
+      roUid.textContent = uid;
+    }, 480);
+
+    setTimeout(function(){
+      highlight("halt");
+    }, 760);
+
+    setTimeout(function(){
+      cardToken.classList.remove("show");
+      reader.classList.remove("lit");
+      if (heroLed) heroLed.classList.remove("on");
+      roPresent.textContent = "waiting";
+      roPresent.className = "val lo";
+      highlight(null);
+      busy = false;
+    }, 1260);
+  }
+  tapCard.addEventListener("click", function(){ tap("card"); });
+  tapFob.addEventListener("click", function(){ tap("fob"); });
+
+  /* ============================================================
+     Copy buttons
+     ============================================================ */
+  var SKETCH_TEXT = [
+    "/*",
+    " * 32_RC522_RFID   (Inland kit Project 32)",
+    " * The RC522 reads 13.56 MHz RFID cards/fobs over SPI. Each card has a unique",
+    " * ID (UID). When you tap a card we read its UID and print it so",
+    " * .\\scripts\\monitor.ps1 shows the card - the basis of any access-card system.",
+    " *",
+    " * Library: MFRC522 (install with .\\scripts\\install-libs.ps1)",
+    " *",
+    " * Wiring (Mega 2560, SPI):",
+    " *   SDA(SS) -> pin 53   SCK -> pin 52   MOSI -> pin 51   MISO -> pin 50",
+    " *   RST -> pin 5        3.3V -> 3V3     GND -> GND",
+    " *",
+    " * Watch it:  .\\scripts\\upload.ps1 32_RC522_RFID  then  .\\scripts\\monitor.ps1",
+    " */",
+    "",
+    "#include <SPI.h>",
+    "#include <MFRC522.h>",
+    "",
+    "#define SS_PIN  53",
+    "#define RST_PIN 5",
+    "",
+    "MFRC522 rfid(SS_PIN, RST_PIN);",
+    "",
+    "void setup() {",
+    "  Serial.begin(9600);",
+    "  SPI.begin();",
+    "  rfid.PCD_Init();",
+    "  Serial.println(\"RC522 ready - tap a card or fob.\");",
+    "}",
+    "",
+    "void loop() {",
+    "  if (!rfid.PICC_IsNewCardPresent()) return;   // nothing on the reader",
+    "  if (!rfid.PICC_ReadCardSerial())  return;    // couldn't read it",
+    "",
+    "  Serial.print(\"card UID:\");",
+    "  for (byte i = 0; i < rfid.uid.size; i++) {",
+    "    Serial.print(' ');",
+    "    if (rfid.uid.uidByte[i] < 0x10) Serial.print('0');",
+    "    Serial.print(rfid.uid.uidByte[i], HEX);",
+    "  }",
+    "  Serial.println();",
+    "",
+    "  rfid.PICC_HaltA();                           // stop reading this card",
+    "  delay(500);",
+    "}"
+  ].join("\n");
+  function flash(btn, ok){ var o = btn.textContent; btn.textContent = ok?"Copied ✓":"Press Ctrl+C"; btn.disabled = true; setTimeout(function(){ btn.textContent=o; btn.disabled=false; }, 1400); }
+  function copyText(text, btn){
+    if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ flash(btn,true); }, function(){ fb(text,btn); }); }
+    else fb(text, btn);
+  }
+  function fb(text, btn){ try{ var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.focus(); ta.select(); var ok=document.execCommand("copy"); document.body.removeChild(ta); flash(btn,ok); }catch(e){ flash(btn,false); } }
+  document.getElementById("copyCode").addEventListener("click", function(){ copyText(SKETCH_TEXT, this); });
+  document.getElementById("copyCmd").addEventListener("click", function(){ copyText(".\\scripts\\upload.ps1 32_RC522_RFID", this); });
+  document.getElementById("copyMon").addEventListener("click", function(){ copyText(".\\scripts\\monitor.ps1", this); });
+
+  /* ============================================================
+     Scroll-spy -> nav + progress
+     ============================================================ */
+  var sections = [].slice.call(document.querySelectorAll("main section[id]"));
+  var navLinks = [].slice.call(document.querySelectorAll(".nav-link"));
+  var navFill = document.getElementById("navFill"), navProgress = document.getElementById("navProgress");
+  var progressTrack = document.getElementById("progressTrack"), progressText = document.getElementById("progressText"), progressPct = document.getElementById("progressPct");
+  var mobileNav = document.getElementById("mobileNav");
+  var titles = ["Overview","How RFID works","Wiring it up","The code","Upload","See it run","Troubleshooting","Challenge"];
+  function setActive(idx){
+    navLinks.forEach(function(a,i){ a.classList.toggle("active", i===idx); a.classList.toggle("done", i<idx); });
+    var pct = sections.length>1 ? Math.round((idx/(sections.length-1))*100) : 0;
+    progressTrack.style.setProperty("--pct", pct+"%");
+    progressText.textContent = titles[idx]||""; progressPct.textContent = pct+"%";
+    navProgress.textContent = "Section "+(idx+1)+" of "+sections.length;
+    if (navFill && navLinks.length>1) navFill.style.height = (idx/(navLinks.length-1)*100)+"%";
+    if (mobileNav && mobileNav.selectedIndex !== idx) mobileNav.selectedIndex = idx;
+  }
+  var activeIdx = 0;
+  if ("IntersectionObserver" in window){
+    var visible = {};
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ visible[en.target.id] = en.isIntersecting ? en.intersectionRatio : 0; });
+      var best=-1, bestR=-1;
+      sections.forEach(function(s,i){ var r=visible[s.id]||0; if (r>bestR+0.001){ bestR=r; best=i; } });
+      if (best>=0 && best!==activeIdx){ activeIdx=best; setActive(best); }
+    }, { rootMargin:"-45% 0px -45% 0px", threshold:[0,0.25,0.5,0.75,1] });
+    sections.forEach(function(s){ io.observe(s); });
+  }
+  setActive(0);
+  if (mobileNav) mobileNav.addEventListener("change", function(){ var t=document.querySelector(mobileNav.value); if (t) t.scrollIntoView({behavior:"smooth", block:"start"}); });
+})();
+</script>
+</body>
+</html>

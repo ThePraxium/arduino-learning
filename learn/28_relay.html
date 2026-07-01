@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Project 28 - 5V Relay Module</title>
+<style>
+  /* ============================================================
+     DAYLIGHT CLASSROOM - shared design system (matches Projects 4 & 5)
+     Portrait bench orientation: Mega left (USB up), breadboard right,
+     column 1 at the top-left. Plus a live serial-monitor pane + a
+     code-follower that highlights the line running on the board.
+     ============================================================ */
+  :root {
+    --step--1: clamp(0.83rem, 0.78rem + 0.2vw, 0.9rem);
+    --step-0:  clamp(1rem, 0.95rem + 0.25vw, 1.08rem);
+    --step-1:  clamp(1.2rem, 1.1rem + 0.5vw, 1.4rem);
+    --step-2:  clamp(1.5rem, 1.3rem + 0.9vw, 1.85rem);
+    --step-3:  clamp(1.95rem, 1.6rem + 1.6vw, 2.6rem);
+    --step-4:  clamp(2.4rem, 1.9rem + 2.4vw, 3.4rem);
+
+    --sp-1: 0.4rem; --sp-2: 0.8rem; --sp-3: 1.2rem;
+    --sp-4: 1.8rem; --sp-5: 2.6rem; --sp-6: 4rem;
+
+    --cream:#fbf7ee; --cream-2:#f4ecdb; --paper:#ffffff;
+    --ink:#2c2a26; --ink-soft:#5b574e; --ink-faint:#8c867a;
+    --line:#e7ddc7; --line-2:#d9cdb0;
+
+    --go:#2faa55; --go-d:#1f7d3e; --slow:#f1b500; --slow-d:#b98700;
+    --stop:#e0473b; --stop-d:#b22f24;
+    --accent:#d98324; --accent-d:#b56712; --sky:#2f7fb0;
+    --tan:#c9a36b; --tan-d:#9c7a44;
+
+    --c1:#e0473b; --c1d:#b22f24; --c2:#e8821e; --c2d:#b5640f;
+    --c3:#f1b500; --c3d:#b98700; --c4:#2faa55; --c4d:#1f7d3e;
+    --c5:#2f8fc0; --c5d:#1f6c95; --c6:#7a5cc8; --c6d:#5a3fa0;
+
+    --shadow-sm:0 1px 2px rgba(75,60,30,.06),0 2px 8px rgba(75,60,30,.06);
+    --shadow:0 4px 14px rgba(75,60,30,.10),0 10px 30px rgba(75,60,30,.07);
+    --shadow-lg:0 10px 30px rgba(75,60,30,.14),0 24px 60px rgba(75,60,30,.10);
+
+    --radius:20px; --radius-sm:12px; --radius-lg:28px;
+    --measure:66ch; --nav-w:256px;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:84px; }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+  }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fff7e6 0%, transparent 55%),
+      radial-gradient(900px 500px at -10% 10%, #f3fbef 0%, transparent 50%),
+      var(--cream);
+    color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    font-size:var(--step-0); line-height:1.65;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  h1,h2,h3,h4{line-height:1.15;letter-spacing:-0.01em;color:var(--ink);margin:0 0 var(--sp-2);}
+  h2{font-size:var(--step-3);} h3{font-size:var(--step-1);}
+  p{margin:0 0 var(--sp-3);max-width:var(--measure);}
+  a{color:var(--accent-d);}
+  code,kbd,pre{font-family:"Cascadia Code","Consolas","SFMono-Regular",ui-monospace,monospace;}
+  :focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:6px;}
+  .skip-link{position:absolute;left:-999px;top:0;z-index:999;background:var(--ink);color:#fff;padding:.6rem 1rem;border-radius:0 0 10px 0;}
+  .skip-link:focus{left:0;}
+
+  .shell{display:flex;align-items:flex-start;max-width:1320px;margin:0 auto;}
+
+  /* side nav */
+  .sidenav{position:sticky;top:0;align-self:flex-start;width:var(--nav-w);flex:0 0 var(--nav-w);height:100vh;overflow-y:auto;padding:var(--sp-4) var(--sp-3) var(--sp-4) var(--sp-4);}
+  .brand{display:flex;align-items:center;gap:.6rem;margin-bottom:var(--sp-4);}
+  .brand .dots{display:inline-flex;gap:4px;padding:6px;background:#36322b;border-radius:9px;box-shadow:var(--shadow-sm);}
+  .brand .dots i{width:9px;height:9px;border-radius:50%;display:block;}
+  .brand .dots i.c1{background:var(--c1);} .brand .dots i.c2{background:var(--c3);}
+  .brand .dots i.c3{background:var(--c4);} .brand .dots i.c4{background:var(--c5);}
+  .brand b{font-size:var(--step--1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;}
+  .brand span{font-size:var(--step-0);font-weight:700;color:var(--ink);}
+  .nav-progress{font-size:var(--step--1);color:var(--ink-faint);margin:0 0 var(--sp-2) 4px;font-variant-numeric:tabular-nums;}
+  .navlist{list-style:none;margin:0;padding:0;position:relative;}
+  .navlist::before{content:"";position:absolute;left:21px;top:18px;bottom:18px;width:3px;background:var(--line-2);border-radius:3px;z-index:0;}
+  .navlist .nav-fill{content:"";position:absolute;left:21px;top:18px;width:3px;height:0;background:linear-gradient(180deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c6));border-radius:3px;z-index:0;transition:height .35s cubic-bezier(.4,0,.2,1);}
+  .navlist a{position:relative;z-index:1;display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;border-radius:12px;color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:var(--step--1);transition:background .15s,color .15s,transform .15s;}
+  .navlist a .num{flex:0 0 1.7rem;height:1.7rem;display:grid;place-items:center;border-radius:50%;background:var(--cream);color:var(--ink-faint);font-size:.78rem;font-weight:800;border:3px solid var(--line-2);transition:inherit;}
+  .navlist a:hover{background:var(--paper);color:var(--ink);box-shadow:var(--shadow-sm);}
+  .navlist a:hover .num{border-color:var(--accent);}
+  .navlist a.active{color:var(--ink);}
+  .navlist a.active .num{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.08);box-shadow:0 0 0 5px #fdecdf;}
+  .navlist a.done .num{background:var(--go);color:#fff;border-color:var(--go);}
+
+  main{flex:1 1 auto;min-width:0;padding:0 clamp(1rem,4vw,3.5rem) var(--sp-6);}
+  .topbar{display:none;}
+  section{scroll-margin-top:84px;padding:var(--sp-5) 0;border-top:1px dashed var(--line-2);}
+  section:first-of-type{border-top:0;}
+  .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:var(--step--1);font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-d);margin-bottom:var(--sp-2);}
+  .eyebrow::before{content:"";width:26px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4),var(--c6));}
+  .lead{font-size:var(--step-1);color:var(--ink-soft);max-width:58ch;}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--sp-4);}
+  .card + .card{margin-top:var(--sp-3);}
+  .grid{display:grid;gap:var(--sp-3);}
+  .grid.cols-2{grid-template-columns:repeat(2,1fr);}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr);}
+
+  .hero{position:relative;overflow:hidden;background:radial-gradient(600px 300px at 90% 0%,#fff3da,transparent 60%),linear-gradient(180deg,#ffffff,#fffaf0);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:clamp(1.6rem,4vw,3rem);margin-top:var(--sp-4);}
+  .hero h1{font-size:var(--step-4);margin-bottom:var(--sp-2);background:linear-gradient(115deg,var(--ink) 30%,var(--accent-d));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero .lead{font-size:var(--step-1);margin-bottom:var(--sp-3);}
+  .hero-badges{display:flex;flex-wrap:wrap;gap:.6rem;}
+  .badge{display:inline-flex;align-items:center;gap:.45rem;background:var(--cream);border:1px solid var(--line-2);padding:.4rem .8rem;border-radius:999px;font-size:var(--step--1);font-weight:700;color:var(--ink-soft);}
+  .badge .swatch{width:11px;height:11px;border-radius:50%;}
+  .hero-motif{position:absolute;right:clamp(1rem,4vw,2.4rem);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px 18px;border-radius:18px;background:#36322b;box-shadow:var(--shadow-lg),inset 0 0 0 3px #4a443a;}
+  .hero-motif .mled{width:26px;height:26px;border-radius:50%;background:#1d1b17;box-shadow:inset 0 2px 5px rgba(0,0,0,.6);transition:background .15s,box-shadow .15s;}
+  .hero-motif .mled.on{background:radial-gradient(circle at 35% 30%,#fff,var(--stop));box-shadow:0 0 16px 4px rgba(224,71,59,.7);}
+  .hero-motif .mbtn{width:34px;height:34px;border-radius:8px;background:#2f6fb0;box-shadow:0 3px 0 #1f4d80, inset 0 2px 3px rgba(255,255,255,.3);}
+  @media (max-width:820px){.hero-motif{display:none;}}
+
+  /* progress bar */
+  .progress-wrap{position:sticky;top:0;z-index:30;background:rgba(251,247,238,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:.55rem clamp(1rem,4vw,3.5rem);margin:0 calc(-1 * clamp(1rem,4vw,3.5rem));}
+  .progress-track{--pct:0%;display:flex;align-items:center;gap:.6rem;max-width:1100px;margin:0 auto;}
+  .progress-bar{position:relative;flex:1 1 auto;height:8px;background:var(--cream-2);border-radius:99px;overflow:hidden;}
+  .progress-bar::after{content:"";position:absolute;inset:0;width:var(--pct);background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c6));border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);}
+  .progress-label{font-size:var(--step--1);font-weight:700;color:var(--ink-soft);white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+  /* parts */
+  .parts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp-2);margin:0;padding:0;list-style:none;}
+  .part{display:flex;gap:.7rem;align-items:center;background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.7rem .8rem;}
+  .part .pico{flex:0 0 38px;height:38px;display:grid;place-items:center;}
+  .part .pname{font-weight:700;font-size:var(--step--1);line-height:1.25;}
+  .part .pqty{display:block;font-size:.72rem;color:var(--ink-faint);font-weight:700;letter-spacing:.03em;}
+
+  .learn-list{list-style:none;margin:0;padding:0;display:grid;gap:var(--sp-2);}
+  .learn-list li{display:flex;gap:.9rem;align-items:flex-start;padding:.9rem 1rem;border-radius:var(--radius-sm);background:var(--cream);border:1px solid var(--line);}
+  .learn-list .k{flex:0 0 2.1rem;height:2.1rem;border-radius:10px;display:grid;place-items:center;font-weight:900;color:#fff;box-shadow:var(--shadow-sm);}
+  .learn-list li:nth-child(1) .k{background:var(--c4);}
+  .learn-list li:nth-child(2) .k{background:var(--c5);}
+  .learn-list li:nth-child(3) .k{background:var(--c6);}
+  .learn-list b{display:block;} .learn-list p{margin:.15rem 0 0;color:var(--ink-soft);font-size:var(--step--1);}
+
+  .callout{display:flex;gap:1rem;align-items:flex-start;background:linear-gradient(180deg,#f1fbf1,#ffffff);border:1px solid #cfe9cf;border-left:5px solid var(--go);border-radius:var(--radius-sm);padding:var(--sp-3) var(--sp-4);}
+  .callout.amber{background:linear-gradient(180deg,#fff6e6,#fff);border-color:#f3dca8;border-left-color:var(--accent);}
+  .callout.sky{background:linear-gradient(180deg,#eef6fb,#fff);border-color:#cfe0ee;border-left-color:var(--sky);}
+  .callout .ic{flex:0 0 auto;font-size:1.6rem;line-height:1;}
+  .callout p:last-child{margin-bottom:0;}
+
+  /* ---------- wiring (portrait diagram + steps) ---------- */
+  .wiring-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);align-items:start;}
+  @media (max-width:1080px){.wiring-grid{grid-template-columns:1fr;}}
+  .diagram-card{padding:var(--sp-3);position:sticky;top:70px;}
+  @media (max-width:1080px){.diagram-card{position:static;}}
+  .diagram-card svg{width:100%;height:auto;display:block;border-radius:var(--radius-sm);}
+  .step-callout{margin-top:var(--sp-2);padding:.7rem .9rem;background:#fff6e6;border:1px solid #f3dca8;border-radius:12px;font-size:var(--step--1);font-weight:700;color:#8a5a16;display:flex;gap:.5rem;align-items:center;min-height:2.4rem;}
+  .step-controls{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-top:var(--sp-3);}
+  .btn{font:inherit;font-weight:700;cursor:pointer;border:1px solid var(--line-2);background:var(--paper);color:var(--ink);padding:.6rem 1.1rem;border-radius:12px;box-shadow:var(--shadow-sm);transition:transform .12s,box-shadow .12s,background .12s;display:inline-flex;align-items:center;gap:.5rem;}
+  .btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--shadow);}
+  .btn:active:not(:disabled){transform:translateY(0);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .btn.primary{background:var(--accent);border-color:var(--accent-d);color:#fff;}
+  .btn.primary:hover:not(:disabled){background:var(--accent-d);}
+  .step-dots{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;}
+  .step-dots button{width:12px;height:12px;border-radius:50%;border:1px solid var(--line-2);background:var(--cream-2);padding:0;cursor:pointer;}
+  .step-dots button[aria-current="true"]{background:var(--accent);border-color:var(--accent-d);transform:scale(1.2);}
+  .steps-panel{display:grid;gap:var(--sp-2);}
+  .step-card{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);box-shadow:var(--shadow-sm);overflow:hidden;transition:box-shadow .2s,border-color .2s,transform .2s;}
+  .step-card.is-active{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px);}
+  .step-card.is-active .step-head{background:linear-gradient(180deg,#fff7e9,#fff);}
+  .step-head{width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;gap:.9rem;padding:.9rem 1.1rem;background:var(--paper);border:0;font:inherit;}
+  .step-head .badge-step{flex:0 0 2.4rem;height:2.4rem;border-radius:12px;display:grid;place-items:center;font-weight:900;color:#fff;background:var(--ink);box-shadow:var(--shadow-sm);}
+  .step-card[data-color="ground"] .badge-step{background:#36322b;}
+  .step-card[data-color="c1"] .badge-step{background:var(--c1);}
+  .step-card[data-color="c2"] .badge-step{background:var(--c2);}
+  .step-card[data-color="c3"] .badge-step{background:var(--c3);color:#6b4e00;}
+  .step-card[data-color="c4"] .badge-step{background:var(--c4);}
+  .step-card[data-color="c5"] .badge-step{background:var(--c5);}
+  .step-card[data-color="c6"] .badge-step{background:var(--c6);}
+  .step-head .step-title{font-weight:800;font-size:var(--step-0);}
+  .step-head .step-sub{display:block;font-weight:600;font-size:var(--step--1);color:var(--ink-faint);}
+  .step-head .chev{margin-left:auto;transition:transform .2s;color:var(--ink-faint);}
+  .step-card.is-active .chev{transform:rotate(90deg);}
+  .step-body{padding:0 1.1rem;max-height:0;overflow:hidden;transition:max-height .35s,padding .35s;}
+  .step-card.is-active .step-body{padding:0 1.1rem 1.1rem;max-height:760px;}
+  .step-body ol{margin:0;padding-left:1.2rem;} .step-body li{margin:.3rem 0;}
+  .step-body li b{color:var(--ink);}
+  .scaffold{font-size:var(--step--1);color:var(--ink-soft);margin:0 0 .2rem;padding-bottom:.6rem;}
+  .pin-pill,.col-pill{display:inline-block;font-weight:800;font-size:.82em;padding:.05em .5em;border-radius:7px;border:1px solid var(--line-2);background:var(--cream-2);white-space:nowrap;}
+  .col-pill{background:#eef4fa;border-color:#cfe0ee;color:var(--sky);}
+  .reuse-note{margin:.7rem 0 0;padding:.55rem .8rem;background:#eef4fa;border:1px solid #cfe0ee;border-radius:10px;font-size:var(--step--1);color:#316b94;}
+  .reuse-note b{color:#245374;}
+  .win-chip{display:inline-flex;align-items:center;gap:.45rem;margin:.7rem 0 0;padding:.5rem .8rem;background:#f1fbf1;border:1px solid #cfe9cf;border-radius:999px;font-size:var(--step--1);font-weight:700;color:var(--go-d);}
+  .legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px dashed var(--line);}
+  .legend span{display:inline-flex;align-items:center;gap:.4rem;font-size:var(--step--1);color:var(--ink-soft);font-weight:600;}
+  .legend .ln{width:22px;height:6px;border-radius:4px;} .legend .sq{width:13px;height:13px;border-radius:3px;}
+
+  /* ---------- code ---------- */
+  .code-shell{display:grid;grid-template-columns:1.05fr 1fr;gap:var(--sp-3);align-items:start;}
+  @media (max-width:980px){.code-shell{grid-template-columns:1fr;}}
+  .codecard{background:#2b2823;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid #1d1b17;}
+  .codecard .codebar{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;background:#211f1b;border-bottom:1px solid #38342d;}
+  .codecard .codebar .fname{color:#d9cdb0;font-size:var(--step--1);font-weight:700;margin-left:.3rem;}
+  .codecard .codebar .traffic{display:inline-flex;gap:6px;}
+  .codecard .codebar .traffic i{width:11px;height:11px;border-radius:50%;}
+  .codecard .copybtn{margin-left:auto;font:inherit;font-size:var(--step--1);font-weight:700;background:#38342d;color:#f4ecdb;border:1px solid #4a443a;padding:.35rem .75rem;border-radius:9px;cursor:pointer;}
+  .codecard .copybtn:hover{background:#4a443a;}
+  pre.code{margin:0;padding:var(--sp-3) var(--sp-4);color:#f4efe2;font-size:.92rem;line-height:1.7;overflow-x:auto;tab-size:2;}
+  pre.code .cl{display:block;border-radius:6px;margin:0 -.5rem;padding:0 .5rem;transition:background .15s,box-shadow .15s;}
+  pre.code .cl.active{background:rgba(217,131,36,.22);box-shadow:inset 3px 0 0 var(--accent);}
+  pre.code .cm{color:#9aa97f;font-style:italic;} pre.code .kw{color:#e0a87a;}
+  pre.code .fn{color:#87c6e8;} pre.code .num{color:#d98aa6;} pre.code .id{color:#f4efe2;} pre.code .str{color:#b6d99a;}
+  .explain{display:grid;gap:var(--sp-2);}
+  .explain-item{background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.9rem 1rem;}
+  .explain-item code{background:#fff;border:1px solid var(--line);border-radius:6px;padding:.05em .4em;font-size:.86em;color:var(--accent-d);}
+  .explain-item h4{margin-bottom:.25rem;font-size:var(--step-0);}
+  .explain-item p{margin:0;font-size:var(--step--1);color:var(--ink-soft);}
+  .explain-item p + p{margin-top:.4rem;}
+  .explain-item.star{background:linear-gradient(180deg,#eef6fb,#fff);border-color:#cfe0ee;}
+  .explain-item.star h4::before{content:"\2605";color:var(--sky);margin-right:.4rem;}
+
+  /* ---------- upload ---------- */
+  .cmd{display:flex;align-items:center;gap:.8rem;background:#211f1b;border-radius:var(--radius-sm);padding:1rem 1.1rem;box-shadow:var(--shadow);}
+  .cmd .prompt{color:var(--go);font-weight:800;}
+  .cmd code{color:#f4efe2;font-size:1.02rem;flex:1 1 auto;overflow-x:auto;}
+  .cmd .copybtn{font:inherit;font-weight:700;font-size:var(--step--1);background:#38342d;color:#f4ecdb;border:1px solid #4a443a;padding:.4rem .8rem;border-radius:9px;cursor:pointer;white-space:nowrap;}
+  .cmd .copybtn:hover{background:#4a443a;}
+  .success-box{margin-top:var(--sp-3);background:linear-gradient(180deg,#f1fbf1,#fff);border:1px solid #cfe9cf;border-radius:var(--radius-sm);padding:var(--sp-3) var(--sp-4);}
+  .success-box pre{background:#211f1b;color:#b6e3b6;border-radius:10px;padding:.8rem 1rem;margin:.6rem 0 0;font-size:.85rem;overflow-x:auto;}
+
+  /* ---------- See it run: interactive button + serial ---------- */
+  .run-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);align-items:start;}
+  @media (max-width:980px){.run-grid{grid-template-columns:1fr;}}
+  .stage{display:grid;place-items:center;gap:var(--sp-3);background:linear-gradient(180deg,#3a352e,#2a2722);border-radius:var(--radius);padding:var(--sp-5) var(--sp-3);box-shadow:var(--shadow-lg),inset 0 0 0 4px #4a443a;}
+  .bigled{width:84px;height:84px;border-radius:50%;background:#1a1815;box-shadow:inset 0 4px 12px rgba(0,0,0,.65);position:relative;transition:background .08s,box-shadow .08s;}
+  .bigled::after{content:"";position:absolute;top:14%;left:18%;width:34%;height:24%;border-radius:50%;background:rgba(255,255,255,.10);}
+  .bigled.on{background:radial-gradient(circle at 35% 30%,#fff,var(--stop));box-shadow:0 0 34px 9px rgba(224,71,59,.7);}
+  .bigled .cap{position:absolute;bottom:-1.5rem;left:50%;transform:translateX(-50%);font-size:.72rem;font-weight:800;color:#b6ad9c;font-family:"Cascadia Code",Consolas,monospace;white-space:nowrap;}
+  .pressbtn{margin-top:1.2rem;width:120px;height:120px;border-radius:20px;border:0;cursor:pointer;background:radial-gradient(circle at 50% 32%,#e6584b,#c0392b);box-shadow:0 10px 0 #7d241b,0 14px 22px rgba(0,0,0,.45),inset 0 3px 6px rgba(255,255,255,.35);color:#fff;font:inherit;font-weight:900;font-size:1rem;letter-spacing:.04em;transition:transform .06s,box-shadow .06s;touch-action:none;user-select:none;}
+  .pressbtn.down{transform:translateY(8px);box-shadow:0 2px 0 #7d241b,0 5px 10px rgba(0,0,0,.4),inset 0 3px 6px rgba(0,0,0,.25);}
+  .press-hint{font-size:var(--step--1);color:#b6ad9c;font-weight:700;}
+  .run-panel{display:flex;flex-direction:column;gap:var(--sp-3);}
+  .readouts{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+  .ro{background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.7rem .9rem;}
+  .ro .lbl{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+  .ro .val{font-family:"Cascadia Code",Consolas,monospace;font-weight:800;font-size:1.05rem;color:var(--ink);}
+  .ro .val.hi{color:var(--go-d);} .ro .val.lo{color:var(--sky);}
+
+  /* serial monitor pane */
+  .serial{background:#0f1412;border:1px solid #243029;border-radius:var(--radius-sm);box-shadow:var(--shadow);overflow:hidden;}
+  .serial .sbar{display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;background:#16201b;border-bottom:1px solid #243029;}
+  .serial .sbar .dot{width:9px;height:9px;border-radius:50%;background:#3ad07a;box-shadow:0 0 8px #3ad07a;}
+  .serial .sbar .stitle{color:#9fe7bd;font-size:.74rem;font-weight:800;letter-spacing:.03em;font-family:"Cascadia Code",Consolas,monospace;}
+  .serial .sbar .scmd{margin-left:auto;color:#5f7a6c;font-size:.7rem;font-family:"Cascadia Code",Consolas,monospace;}
+  .serial pre{margin:0;padding:.7rem .9rem;height:190px;overflow-y:auto;color:#bdf3cf;font-size:.82rem;line-height:1.55;font-family:"Cascadia Code",Consolas,monospace;}
+  .serial pre .new{animation:flashin .5s ease;}
+  .serial pre .muted{color:#5f7a6c;}
+  @keyframes flashin{from{background:rgba(58,208,122,.22);}to{background:transparent;}}
+  .mini-code{background:#2b2823;border:1px solid #1d1b17;border-radius:var(--radius-sm);overflow:hidden;}
+  .mini-code .mbar{padding:.4rem .8rem;background:#211f1b;border-bottom:1px solid #38342d;color:#d9cdb0;font-size:.72rem;font-weight:700;font-family:"Cascadia Code",Consolas,monospace;}
+  pre.mini{margin:0;padding:.6rem .9rem;color:#f4efe2;font-size:.8rem;line-height:1.6;overflow-x:auto;}
+  pre.mini .cl{display:block;border-radius:5px;margin:0 -.4rem;padding:0 .4rem;}
+  pre.mini .cl.active{background:rgba(217,131,36,.22);box-shadow:inset 3px 0 0 var(--accent);}
+
+  /* troubleshooting */
+  .trouble{display:grid;gap:var(--sp-2);}
+  .tcard{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);box-shadow:var(--shadow-sm);overflow:hidden;}
+  .tcard summary{list-style:none;cursor:pointer;padding:1rem 1.1rem;display:flex;align-items:center;gap:.8rem;font-weight:800;}
+  .tcard summary::-webkit-details-marker{display:none;}
+  .tcard summary .tsym{flex:0 0 2.1rem;height:2.1rem;border-radius:10px;display:grid;place-items:center;background:#fdecdf;color:var(--accent-d);font-size:1.2rem;}
+  .tcard summary .plus{margin-left:auto;color:var(--ink-faint);font-weight:900;transition:transform .2s;}
+  .tcard[open] summary .plus{transform:rotate(45deg);}
+  .tcard .tbody{padding:0 1.1rem 1.1rem 4rem;} .tcard .tbody p{margin:0;color:var(--ink-soft);}
+  .tcard .fix{margin-top:.5rem;padding:.65rem .85rem;background:#f1fbf1;border:1px solid #cfe9cf;border-radius:10px;font-size:var(--step--1);}
+  .tcard .fix b{color:var(--go-d);}
+  .tcard .fix code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:.05em .4em;font-size:.9em;color:var(--accent-d);}
+
+  /* challenge */
+  .challenge-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);}
+  @media (max-width:720px){.challenge-grid{grid-template-columns:1fr;}}
+  .ch-card{background:linear-gradient(180deg,#fff,#fffaf0);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--sp-4);position:relative;}
+  .ch-card .ch-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--accent);padding:.25rem .6rem;border-radius:999px;}
+  .ch-card h3{margin-top:.7rem;}
+  .ch-card pre{background:#211f1b;color:#f4efe2;border-radius:10px;padding:.8rem 1rem;font-size:.82rem;overflow-x:auto;}
+  .ch-card .cm{color:#9aa97f;}
+  .finish{margin-top:var(--sp-5);text-align:center;background:linear-gradient(180deg,#fff7e9,#fff);border:1px dashed var(--line-2);border-radius:var(--radius-lg);padding:var(--sp-5);}
+  .finish .conf{font-size:2.4rem;}
+  .finish h2{background:linear-gradient(115deg,var(--go-d),var(--accent-d),var(--c6));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  footer{text-align:center;color:var(--ink-faint);font-size:var(--step--1);padding:var(--sp-4) 0 var(--sp-2);}
+  .vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
+  @media (max-width:880px){
+    .sidenav{display:none;}
+    .topbar{display:block;position:sticky;top:0;z-index:40;background:rgba(251,247,238,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:.6rem clamp(.8rem,4vw,1.2rem);}
+    .topbar .tb-row{display:flex;align-items:center;gap:.7rem;}
+    .topbar .brand{margin-bottom:0;}
+    .topbar select{margin-left:auto;font:inherit;font-weight:700;font-size:var(--step--1);padding:.45rem .7rem;border-radius:10px;border:1px solid var(--line-2);background:var(--paper);color:var(--ink);}
+    main{padding-top:0;} section:first-of-type{padding-top:var(--sp-3);}
+    html{scroll-padding-top:120px;} .progress-wrap{top:52px;}
+  }
+  @media (max-width:560px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr;}.hero{padding:1.3rem;}.readouts{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#overview">Skip to content</a>
+<div class="shell">
+  <!-- ===================== SIDE NAV ===================== -->
+  <nav class="sidenav" aria-label="Section navigation">
+    <div class="brand">
+      <span class="dots" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></span>
+      <span><b>Project 28</b><span>5V Relay</span></span>
+    </div>
+    <p class="nav-progress" id="navProgress">Section 1 of 8</p>
+    <ul class="navlist" id="navlist">
+      <span class="nav-fill" id="navFill" aria-hidden="true"></span>
+      <li><a href="#overview"  class="nav-link"><span class="num">1</span> Overview</a></li>
+      <li><a href="#idea"      class="nav-link"><span class="num">2</span> What a relay is</a></li>
+      <li><a href="#wiring"    class="nav-link"><span class="num">3</span> Wiring it up</a></li>
+      <li><a href="#code"      class="nav-link"><span class="num">4</span> The code</a></li>
+      <li><a href="#upload"    class="nav-link"><span class="num">5</span> Upload</a></li>
+      <li><a href="#run"       class="nav-link"><span class="num">6</span> See it run</a></li>
+      <li><a href="#trouble"   class="nav-link"><span class="num">7</span> Troubleshooting</a></li>
+      <li><a href="#challenge" class="nav-link"><span class="num">8</span> Challenge</a></li>
+    </ul>
+  </nav>
+  <div class="topbar">
+    <div class="tb-row">
+      <div class="brand"><span class="dots" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></span><span><span style="font-weight:800">5V Relay</span></span></div>
+      <label class="vh" for="mobileNav">Jump to section</label>
+      <select id="mobileNav">
+        <option value="#overview">1. Overview</option>
+        <option value="#idea">2. What a relay is</option>
+        <option value="#wiring">3. Wiring it up</option>
+        <option value="#code">4. The code</option>
+        <option value="#upload">5. Upload</option>
+        <option value="#run">6. See it run</option>
+        <option value="#trouble">7. Troubleshooting</option>
+        <option value="#challenge">8. Challenge</option>
+      </select>
+    </div>
+  </div>
+
+  <main>
+    <div class="progress-wrap">
+      <div class="progress-track" id="progressTrack">
+        <span class="progress-label" id="progressText">Getting started</span>
+        <div class="progress-bar" aria-hidden="true"></div>
+        <span class="progress-label" id="progressPct">0%</span>
+      </div>
+    </div>
+
+    <!-- ============== 1. OVERVIEW ============== -->
+    <section id="overview" aria-labelledby="overview-h">
+      <div class="hero">
+        <p class="eyebrow">Project 28 &middot; Beginner build</p>
+        <h1 id="overview-h">5V Relay Module</h1>
+        <p class="lead">A relay is a tiny <b>electrically-controlled mechanical switch</b>. Your Arduino sends one little 5&nbsp;volt signal, and the relay <b>physically flips a switch</b> inside &mdash; you actually hear it <b>CLICK</b>. That click can turn on things far bigger than an LED: a lamp, a motor, a fan. Today you'll make it click on and off, on a timer, all by itself.</p>
+        <div class="hero-badges">
+          <span class="badge"><span class="swatch" style="background:var(--sky)"></span> 1 relay module</span>
+          <span class="badge">&#128268; Pin 8 + 5V + GND</span>
+          <span class="badge">&#128396;&#65039; digitalWrite click</span>
+          <span class="badge">&#9201; ~15 min</span>
+        </div>
+        <div class="hero-motif" aria-hidden="true"><div class="mled" id="heroLed"></div><div class="mbtn"></div></div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top:var(--sp-4)">
+        <div class="card">
+          <h3>What you'll build</h3>
+          <p>A relay module sitting next to your Mega, wired with just <b>three control wires</b>: signal, power, ground. Every 1.5&nbsp;seconds the Arduino energizes the relay's coil, it <b>clicks closed</b>, then releases and <b>clicks open</b> &mdash; over and over. The serial monitor narrates each click so you can <b>hear it and read it together</b>.</p>
+          <div class="callout amber"><span class="ic" aria-hidden="true">&#128161;</span><p>Here's the lovely part: driving a relay is <b>exactly like driving an LED</b>. <code>digitalWrite(pin, HIGH)</code> energizes the coil; <code>LOW</code> lets it go. You already know how to do this!</p></div>
+        </div>
+        <div class="card">
+          <h3>What you'll learn</h3>
+          <ul class="learn-list">
+            <li><span class="k" aria-hidden="true">1</span><div><b>A relay = a switch you control</b><p>One small signal flips a separate, bigger circuit on or off &mdash; safely isolated from your Arduino.</p></div></li>
+            <li><span class="k" aria-hidden="true">2</span><div><b>Coil, armature &amp; contacts</b><p>Power the coil and a metal arm snaps across to the <code>NO</code> (normally-open) contact. Release it and a spring snaps it back.</p></div></li>
+            <li><span class="k" aria-hidden="true">3</span><div><b>NO vs NC</b><p>Normally-Open is off until you click; Normally-Closed is on until you click. Pick the one your gadget needs.</p></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:var(--sp-3)">
+        <h3>Parts at a glance</h3>
+        <p style="margin-bottom:var(--sp-3)">Wonderfully short list. The star is the <b>relay module</b> &mdash; the little blue box with a screw-terminal block on one end and three header pins (<b>IN, VCC, GND</b>) on the other. The booklet also switches a <b>red LED</b> on the relay's output side so you can see the click do real work.</p>
+        <ul class="parts">
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="38" height="34" viewBox="0 0 38 34"><rect x="6" y="7" width="26" height="20" rx="2" fill="#2f6fb0" stroke="#1f4d80"/><rect x="9" y="10" width="13" height="14" rx="2" fill="#2a4f73"/><circle cx="27" cy="13" r="2.2" fill="#d6e2ee"/><circle cx="27" cy="20" r="2.2" fill="#d6e2ee"/><g stroke="#888" stroke-width="1.6"><line x1="13" y1="27" x2="13" y2="31"/><line x1="19" y1="27" x2="19" y2="31"/><line x1="25" y1="27" x2="25" y2="31"/></g></svg></span><span><span class="pname">5V relay module</span><span class="pqty">Qty 1 &middot; the switch</span></span></li>
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="16" r="7" fill="#e0473b"/><line x1="14" y1="24" x2="14" y2="32" stroke="#888" stroke-width="2"/><line x1="20" y1="24" x2="20" y2="32" stroke="#888" stroke-width="2"/></svg></span><span><span class="pname">Red LED</span><span class="pqty">Qty 1 &middot; the load</span></span></li>
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="40" height="34" viewBox="0 0 40 34"><path d="M4 17 h7 l3 -7 l4 14 l4 -10 l3 3 h11" fill="none" stroke="#2f8fc0" stroke-width="2"/></svg></span><span><span class="pname">Jumper wires</span><span class="pqty">Qty 3 &middot; IN / VCC / GND</span></span></li>
+          <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><rect x="4" y="7" width="26" height="20" rx="3" fill="#f3ecdb" stroke="#cbbd9d"/><g fill="#cbbd9d"><circle cx="9" cy="13" r="1"/><circle cx="13" cy="13" r="1"/><circle cx="17" cy="13" r="1"/><circle cx="21" cy="13" r="1"/><circle cx="25" cy="13" r="1"/></g></svg></span><span><span class="pname">Breadboard</span><span class="pqty">+ Mega 2560 &amp; USB</span></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============== 2. WHAT A RELAY IS ============== -->
+    <section id="idea" aria-labelledby="idea-h">
+      <p class="eyebrow">Before we wire</p>
+      <h2 id="idea-h">What a relay actually is</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>A magnet that flips a switch</h3>
+          <p>Inside the blue box is a tiny <b>coil</b> of wire. Send 5V through it and it becomes an <b>electromagnet</b>. That magnet yanks a little metal arm (the <b>armature</b>) across a gap &mdash; <em>click!</em> &mdash; closing a completely separate circuit. Cut the power and a spring snaps the arm back &mdash; <em>click!</em> &mdash; opening it again.</p>
+          <p style="margin-bottom:0">The beauty: the side your Arduino touches and the side that does the heavy lifting <b>never electrically meet</b>. The relay keeps your delicate board safe from the big stuff.</p>
+        </div>
+        <div class="card">
+          <h3>NO and NC &mdash; two ways to wire it</h3>
+          <p>The screw terminals give you three posts: <b>COM</b> (common), <b>NO</b> (normally-open) and <b>NC</b> (normally-closed).</p>
+          <div class="callout sky"><span class="ic" aria-hidden="true">&#128396;&#65039;</span><p style="margin:0">Wire your gadget to <b>NO</b> and it's <b>off</b> until the Arduino clicks the relay on. Wire it to <b>NC</b> and it's <b>on</b> until the Arduino clicks it off. Today we watch the <b>NO</b> side: the red LED lights only while the relay is energized.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 3. WIRING ============== -->
+    <section id="wiring" aria-labelledby="wiring-h">
+      <p class="eyebrow">The main event</p>
+      <h2 id="wiring-h">Wiring it up, step by step</h2>
+      <p class="lead">The diagram is drawn the way it sits on your desk: <b>Mega on the left with the USB &amp; power facing away from you</b>, the <b>breadboard on the right with column&nbsp;1 at the top-left</b>. The relay module rides along the <b>a&ndash;e half</b> (nearest the Mega). Only <b>three control wires</b> &mdash; use <b>Prev / Next</b> and watch each one light up.</p>
+
+      <div class="wiring-grid">
+        <div class="card diagram-card">
+          <svg id="bb" viewBox="0 0 512 540" role="img" aria-label="Top-down wiring diagram: Mega 2560 on the left with USB and power facing away, portrait breadboard on the right with column 1 at the top-left, and a 5V relay module wired with three control wires.">
+            <title>5V relay module wiring</title>
+            <desc id="diagDesc">The diagram highlights the wire or part added at the current step.</desc>
+            <g id="bbStatic"></g>
+            <g id="bbLayers"></g>
+          </svg>
+          <div class="step-callout" id="stepCallout" aria-live="polite">Add now: the relay module's IN pin to Mega pin 8.</div>
+          <div class="legend" aria-hidden="true">
+            <span><span class="ln" style="background:#cf3b2f"></span> 5V (red)</span>
+            <span><span class="ln" style="background:#222"></span> GND (black)</span>
+            <span><span class="ln" style="background:var(--c2)"></span> signal</span>
+            <span><span class="sq" style="background:#2f6fb0"></span> relay</span>
+            <span><span class="sq" style="background:var(--stop);border-radius:50%"></span> LED load</span>
+          </div>
+        </div>
+
+        <div class="steps-panel" id="stepsPanel">
+          <div class="step-card" data-step="0" data-color="c6">
+            <button class="step-head" aria-expanded="true" aria-controls="sb0"><span class="badge-step" aria-hidden="true">0</span><span><span class="step-title">Seat the relay module</span><span class="step-sub">Three header pins into the a&ndash;e half</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb0">
+              <p class="scaffold">The relay's three header pins are labelled <b>IN</b>, <b>VCC</b> and <b>GND</b>. Press them into three holes in the same column band so each pin gets its own row.</p>
+              <ol>
+                <li>Set the module so its pins land at about <span class="col-pill">columns 4&ndash;6</span> on the <b>a&ndash;e</b> side.</li>
+                <li>That gives us <b>IN</b> at column 4, <b>VCC</b> at column 5, <b>GND</b> at column 6 &mdash; each on its own row of holes.</li>
+              </ol>
+              <div class="reuse-note">The blue box and its screw-terminal block (COM / NO / NC) hang off to the side &mdash; that's the output your bigger gadget connects to.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="1" data-color="c2">
+            <button class="step-head" aria-expanded="false" aria-controls="sb1"><span class="badge-step" aria-hidden="true">1</span><span><span class="step-title">IN &rarr; pin 8</span><span class="step-sub">The signal that flips the coil</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb1">
+              <ol>
+                <li>Signal wire from Mega <span class="pin-pill">pin 8</span> &rarr; the relay's <b>IN</b> pin at <span class="col-pill">column 4, row a</span>.</li>
+              </ol>
+              <div class="reuse-note">This is the one wire that does the controlling. Set it <b>HIGH</b> in code and the coil energizes; <b>LOW</b> and it lets go.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="2" data-color="c1">
+            <button class="step-head" aria-expanded="false" aria-controls="sb2"><span class="badge-step" aria-hidden="true">2</span><span><span class="step-title">VCC &rarr; 5V</span><span class="step-sub">Power for the coil</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb2">
+              <ol>
+                <li>Red wire from Mega <span class="pin-pill">5V</span> &rarr; the relay's <b>VCC</b> pin at <span class="col-pill">column 5, row a</span>.</li>
+              </ol>
+              <div class="reuse-note">The coil needs a steady 5V to have the muscle to snap the armature across. This is the relay's power supply.</div>
+            </div>
+          </div>
+          <div class="step-card" data-step="3" data-color="ground">
+            <button class="step-head" aria-expanded="false" aria-controls="sb3"><span class="badge-step" aria-hidden="true">3</span><span><span class="step-title">GND &rarr; GND</span><span class="step-sub">Complete the circuit</span></span><span class="chev" aria-hidden="true">&#9654;</span></button>
+            <div class="step-body" id="sb3">
+              <ol>
+                <li>Black wire from Mega <span class="pin-pill">GND</span> &rarr; the relay's <b>GND</b> pin at <span class="col-pill">column 6, row a</span>.</li>
+              </ol>
+              <div class="count-check win-chip"><span aria-hidden="true">&#127881;</span> Done! Just three wires: IN&rarr;8, VCC&rarr;5V, GND&rarr;GND. The red LED on the relay's NO terminal will light each time it clicks.</div>
+            </div>
+          </div>
+
+          <div class="step-controls">
+            <button class="btn" id="prevStep">&larr; Prev</button>
+            <div class="step-dots" id="stepDots" role="tablist" aria-label="Wiring steps"></div>
+            <button class="btn primary" id="nextStep">Next &rarr;</button>
+          </div>
+          <div class="callout" style="margin-top:var(--sp-2)"><span class="ic" aria-hidden="true">&#9989;</span><p style="margin:0"><b>Golden rule:</b> match the labels exactly &mdash; <b>IN</b> to the signal pin (8), <b>VCC</b> to <b>5V</b>, <b>GND</b> to <b>GND</b>. The screw-terminal side (COM / NO / NC) is a separate circuit; the booklet puts the red LED on <b>NO</b>.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 4. CODE ============== -->
+    <section id="code" aria-labelledby="code-h">
+      <p class="eyebrow">The brains</p>
+      <h2 id="code-h">The code, line by line</h2>
+      <p class="lead">It's already saved at <code>sketches\28_Relay</code>. If you've blinked an LED, you've basically written this already: <b>HIGH, wait, LOW, wait, repeat</b>. The only new idea is what's on the other end of the wire &mdash; a clicking switch instead of a light. Every <code>Serial.println</code> is a line you'll see scroll past in the monitor.</p>
+      <div class="code-shell">
+        <div class="codecard">
+          <div class="codebar"><span class="traffic" aria-hidden="true"><i style="background:#e0473b"></i><i style="background:#f1b500"></i><i style="background:#2faa55"></i></span><span class="fname">28_Relay.ino</span><button class="copybtn" id="copyCode" type="button">Copy</button></div>
+          <pre class="code" id="codeBlock" tabindex="0" aria-label="Arduino sketch source code"></pre>
+        </div>
+        <div class="explain">
+          <div class="explain-item star"><h4>setup() &mdash; one output, one greeting</h4><p><code>pinMode(relayPin, OUTPUT)</code> makes pin&nbsp;8 a driver, just like an LED. <code>Serial.begin(9600)</code> opens the monitor link, and we print <code>"Relay ready - clicking on and off."</code> so you know it's alive.</p></div>
+          <div class="explain-item star"><h4>digitalWrite(HIGH) &mdash; the click on</h4><p><code>digitalWrite(relayPin, HIGH)</code> sends 5V to the IN pin. The coil energizes, the armature snaps to <b>NO</b>, and you hear a <b>click</b>. The NO contact is now closed &mdash; the LED on it lights.</p></div>
+          <div class="explain-item star"><h4>digitalWrite(LOW) &mdash; the click off</h4><p><code>digitalWrite(relayPin, LOW)</code> cuts the signal. The spring pulls the armature back, the NO contact opens with another <b>click</b>, and the LED goes dark.</p></div>
+          <div class="explain-item"><h4>delay(1500) &mdash; the rhythm</h4><p>Each <code>delay(1500)</code> holds the state for 1.5 seconds before flipping. That slow, steady beat is what makes the clicking so satisfying &mdash; speed it up or slow it down to taste.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 5. UPLOAD ============== -->
+    <section id="upload" aria-labelledby="upload-h">
+      <p class="eyebrow">Send it to the board</p>
+      <h2 id="upload-h">Upload &amp; open the monitor</h2>
+      <p class="lead">Plug the Mega in. From the project root in PowerShell, upload, then open the serial monitor to read each click as you hear it:</p>
+      <div class="card">
+        <div class="cmd"><span class="prompt" aria-hidden="true">PS&gt;</span><code id="uploadCmd">.\scripts\upload.ps1 28_Relay</code><button class="copybtn" id="copyCmd" type="button">Copy</button></div>
+        <div class="cmd" style="margin-top:var(--sp-2)"><span class="prompt" aria-hidden="true">PS&gt;</span><code id="monitorCmd">.\scripts\monitor.ps1</code><button class="copybtn" id="copyMon" type="button">Copy</button></div>
+        <p style="margin:var(--sp-3) 0 0;font-size:var(--step--1);color:var(--ink-soft)">In the Claude chat you can run either line by prefixing it with <code style="background:var(--cream-2);padding:.05em .4em;border-radius:5px">!&nbsp;</code>. The monitor runs at <b>9600 baud</b> &mdash; press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop it.</p>
+        <div class="success-box">
+          <b style="color:var(--go-d)">&#10003; What success looks like</b>
+          <p style="margin:.4rem 0 0;font-size:var(--step--1);color:var(--ink-soft)">Upload ends with <b>done uploading</b>, then the monitor prints the greeting and a steady stream of clicks &mdash; one every 1.5 seconds:</p>
+          <pre>done uploading 28_Relay
+Relay ready - clicking on and off.
+Relay ON  (click) -> NO contact closed
+Relay OFF (click) -> NO contact open</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 6. SEE IT RUN ============== -->
+    <section id="run" aria-labelledby="run-h">
+      <p class="eyebrow">Preview</p>
+      <h2 id="run-h">See it run</h2>
+      <p class="lead">This one runs itself &mdash; no button to hold. Watch four things move together every 1.5&nbsp;seconds: the <b>relay armature</b> swings to <b>NO</b> with a <b>CLICK</b>, the little <b>lamp</b> lights, the <b>line of code</b> running on the board highlights, and the <b>serial monitor</b> prints exactly what <code>.\scripts\monitor.ps1</code> shows.</p>
+      <div class="run-grid">
+        <div class="stage">
+          <svg id="relaySim" viewBox="0 0 200 170" width="200" height="170" role="img" aria-label="Animated relay: the armature swings to the NO contact and a lamp lights when the relay is energized.">
+            <!-- coil -->
+            <rect x="18" y="58" width="34" height="54" rx="5" fill="#2f6fb0" stroke="#1f4d80" stroke-width="2"/>
+            <g stroke="#9ec4e6" stroke-width="2" fill="none">
+              <line x1="22" y1="66" x2="48" y2="66"/><line x1="22" y1="76" x2="48" y2="76"/>
+              <line x1="22" y1="86" x2="48" y2="86"/><line x1="22" y1="96" x2="48" y2="96"/>
+              <line x1="22" y1="106" x2="48" y2="106"/>
+            </g>
+            <text x="35" y="128" fill="#b6ad9c" font-family="monospace" font-size="9" font-weight="700" text-anchor="middle">COIL</text>
+            <!-- pivot post -->
+            <circle cx="78" cy="85" r="4" fill="#cbb98c"/>
+            <line x1="78" y1="85" x2="78" y2="120" stroke="#8a7b55" stroke-width="3"/>
+            <text x="78" y="135" fill="#b6ad9c" font-family="monospace" font-size="8" font-weight="700" text-anchor="middle">COM</text>
+            <!-- NC contact (top, idle target) -->
+            <circle id="ncPad" cx="150" cy="52" r="6" fill="#5a5248" stroke="#3a352e" stroke-width="2"/>
+            <text x="166" y="56" fill="#8c867a" font-family="monospace" font-size="9" font-weight="700" text-anchor="start">NC</text>
+            <!-- NO contact (bottom, energized target) -->
+            <circle id="noPad" cx="150" cy="118" r="6" fill="#5a5248" stroke="#3a352e" stroke-width="2"/>
+            <text x="166" y="122" fill="#8c867a" font-family="monospace" font-size="9" font-weight="700" text-anchor="start">NO</text>
+            <!-- the armature arm; rotates about the pivot -->
+            <g id="armature" style="transition:transform .12s ease;transform-origin:78px 85px;">
+              <line x1="78" y1="85" x2="150" y2="52" stroke="#e9c46a" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="150" cy="52" r="3.4" fill="#f4d98a"/>
+            </g>
+            <!-- the lamp (lights when NO is closed) -->
+            <circle id="simLamp" cx="150" cy="118" r="11" fill="#1a1815" stroke="#3a352e" stroke-width="2"/>
+            <!-- CLICK label -->
+            <text id="clickLabel" x="100" y="22" fill="#3ad07a" font-family="monospace" font-size="14" font-weight="800" text-anchor="middle" opacity="0">CLICK</text>
+          </svg>
+          <div class="bigled" id="simLed" style="display:none"></div>
+          <span class="press-hint" id="runHint">running on its own &middot; clicks every 1.5s</span>
+        </div>
+        <div class="run-panel">
+          <div class="readouts">
+            <div class="ro"><span class="lbl">pin 8 drives</span><span class="val lo" id="roPin">LOW (0V)</span></div>
+            <div class="ro"><span class="lbl">NO contact</span><span class="val" id="roState">open</span></div>
+          </div>
+          <div class="mini-code">
+            <div class="mbar">loop() &mdash; running on the board</div>
+            <pre class="mini" id="miniCode"></pre>
+          </div>
+          <div class="serial">
+            <div class="sbar"><span class="dot" aria-hidden="true"></span><span class="stitle">COM5 &middot; 9600 baud</span><span class="scmd">monitor.ps1</span></div>
+            <pre id="serialOut" aria-live="polite" aria-label="Simulated serial monitor output"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 7. TROUBLESHOOTING ============== -->
+    <section id="trouble" aria-labelledby="trouble-h">
+      <p class="eyebrow">When something's off</p>
+      <h2 id="trouble-h">Troubleshooting</h2>
+      <p class="lead">Almost every &ldquo;it's not clicking!&rdquo; is one of these &mdash; and the serial monitor tells you whether the code is even trying.</p>
+      <div class="trouble">
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#128396;&#65039;</span> No clicking at all<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>The monitor scrolls <code>Relay ON</code> / <code>Relay OFF</code> happily, but you hear nothing. The code is fine &mdash; the relay just isn't getting power or signal.</p><div class="fix"><b>Fix:</b> Check all three control wires: <b>IN</b> to <code>pin 8</code>, <b>VCC</b> to <b>5V</b>, <b>GND</b> to <b>GND</b>. A loose VCC is the usual culprit &mdash; the coil has no muscle without a solid 5V.</div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#128268;</span> It clicks, but the LED never lights<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>You hear the click but the red load LED stays dark.</p><div class="fix"><b>Fix:</b> The LED is on the wrong output post. The booklet wires the load to <b>COM</b> and <b>NO</b>, so it lights only when energized. If it's on <b>NC</b> instead, it does the opposite &mdash; on while idle, off on click.</div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#9889;</span> The relay clicks backwards<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>The monitor says <code>ON</code> but the load is off, and vice-versa.</p><div class="fix"><b>Fix:</b> Many of these modules are <b>active-LOW</b> (HIGH releases, LOW energizes). If yours behaves inverted, just swap <code>HIGH</code> and <code>LOW</code> in the sketch &mdash; the click pattern will match the labels.</div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#129514;</span> The monitor is blank or gibberish<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>No text, or random symbols.</p><div class="fix"><b>Fix:</b> The sketch prints at <b>9600 baud</b>, so run <code>.\scripts\monitor.ps1</code> (it defaults to 9600). If you opened another monitor, close it &mdash; only one program can use the port.</div></div></details>
+      </div>
+    </section>
+
+    <!-- ============== 8. CHALLENGE ============== -->
+    <section id="challenge" aria-labelledby="challenge-h">
+      <p class="eyebrow">Level up</p>
+      <h2 id="challenge-h">Challenge &amp; extend</h2>
+      <p class="lead">Got it clicking? Try one of these &mdash; small code tweaks, big payoff. Re-upload with the same command after each change.</p>
+      <div class="challenge-grid">
+        <div class="ch-card"><span class="ch-tag">Easy</span><h3>Change the rhythm</h3><p>Make it click slower &mdash; once every three seconds &mdash; or fast like a turn signal. Just change the two delays:</p><pre>digitalWrite(relayPin, HIGH);
+Serial.println("Relay ON  (click) -> NO contact closed");
+delay(<b>3000</b>);   <span class="cm">// was 1500</span>
+digitalWrite(relayPin, LOW);
+Serial.println("Relay OFF (click) -> NO contact open");
+delay(<b>3000</b>);   <span class="cm">// was 1500</span></pre><p style="margin:0">A slow, deliberate clunk &mdash; or a rapid-fire chatter.</p></div>
+        <div class="ch-card"><span class="ch-tag">A step further</span><h3>Click on a button press</h3><p>Bring back Project 6's button: read pin 2, and click the relay only while you're holding it &mdash; a real, physical switch you command:</p><pre><span class="cm">// in loop(), instead of the timer:</span>
+<span class="kw">int</span> s = digitalRead(2);
+digitalWrite(relayPin, s);  <span class="cm">// press = click</span></pre><p style="margin:0">Hint: wire the button exactly as in Project 6 (with its 10k pull-down) and add <code>pinMode(2, INPUT)</code>.</p></div>
+      </div>
+      <div class="finish"><div class="conf" aria-hidden="true">&#127881;</div><h2>You can switch the big world now!</h2><p style="margin:0 auto;max-width:54ch;color:var(--ink-soft)">You drove a relay with the same <code>digitalWrite</code> you use for an LED &mdash; and that one click can control lamps, fans, motors, anything. You met the coil, the armature, and the NO/NC contacts, and watched the serial monitor narrate every click. This is how a 5V brain reaches out and moves real machines. Onward!</p></div>
+    </section>
+
+    <footer>Project 28 &middot; 5V Relay Module &middot; Inland / Keyestudio Mega 2560 R3 &middot; works fully offline</footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+
+  /* ============================================================
+     PORTRAIT DIAGRAM ENGINE  (shared across all guides)
+     Bench orientation: Mega LEFT (USB up), breadboard RIGHT,
+     column 1 at the TOP-LEFT, columns counting DOWN, rows a-e | f-j
+     running left->right, +/- rails vertical on the outer edges.
+     ============================================================ */
+  var COL_TOP = 96, DY = 30;                 // y of column 1, spacing downward
+  function colY(c){ return COL_TOP + (c - 1) * DY; }
+  var ROWX = { a:262, b:281, c:300, d:319, e:338, f:376, g:395, h:414, i:433, j:452 };
+  var RAIL = { plus:212, minus:230 };        // left rail pair x (the one we use)
+  var RRAIL = { minus:476, plus:492 };       // right rail pair x (drawn, idle)
+  var PORT_X = 174;                          // Mega right edge (pins face the board)
+  var BOARD_COLS = 11;                       // how many columns to draw
+
+  // Mega pin ports exposed on the right edge, top -> bottom
+  var PORTS = {
+    "5V":  { y:150, color:"#cf3b2f", label:"5V"  },
+    "GND": { y:225, color:"#222",    label:"GND" },
+    "D8":  { y:330, color:"#e8821e", label:"8"   }
+  };
+
+  /* order the Mega's right-edge ports to match the real board layout:
+     power at top, GND, then digital pins DESCENDING (13..2), analog at bottom.
+     Prevents the wire-crossing you get when pin 2 is drawn above pin 8. */
+  (function orderPorts(){
+    function rank(k){
+      if (k==="5V") return 0;
+      if (k==="3V3"||k==="3.3V"||k==="3V") return 1;
+      if (k==="VIN") return 2;
+      if (k==="GND") return 3;
+      if (k.charAt(0)==="A") return 1000 + parseInt(k.slice(1),10);      // analog -> bottom
+      var d = (k.charAt(0)==="D") ? k.slice(1) : k;
+      var n = parseInt(d,10);
+      if (!isNaN(n)) return 100 - n;                                    // digital -> descending
+      return 500;
+    }
+    var keys = Object.keys(PORTS);
+    var ys = keys.map(function(k){ return PORTS[k].y; }).sort(function(a,b){ return a-b; });
+    keys.slice().sort(function(a,b){ return rank(a)-rank(b); })
+        .forEach(function(k,i){ PORTS[k].y = ys[i]; });
+  })();
+
+
+  function E(tag, attrs){
+    var n = document.createElementNS(NS, tag), k;
+    for (k in attrs) if (attrs.hasOwnProperty(k)) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+  function dot(g, x, y, color, r){ g.appendChild(E("circle", { cx:x, cy:y, r:(r||3.4), fill:color })); }
+  function poly(g, pts, color, w){
+    g.appendChild(E("polyline", { points:pts, fill:"none", stroke:color, "stroke-width":(w||3.2),
+      "stroke-linecap":"round", "stroke-linejoin":"round" }));
+  }
+
+  /* ---- static scaffold: Mega + breadboard + rails + holes ---- */
+  (function buildStatic(){
+    var g = document.getElementById("bbStatic");
+    var gridBottom = colY(BOARD_COLS) + 14;
+
+    // ===== Arduino Mega (left, vertical, USB + power at the TOP / away) =====
+    g.appendChild(E("rect", { x:24, y:70, width:150, height:gridBottom-70+10, rx:9, fill:"#0b6b3a", stroke:"#085029", "stroke-width":1.5 }));
+    // USB connector sticking UP (away from viewer)
+    g.appendChild(E("rect", { x:40, y:36, width:46, height:40, rx:4, fill:"#b9c0c4", stroke:"#8a9094" }));
+    g.appendChild(E("rect", { x:46, y:30, width:34, height:12, rx:2, fill:"#cdd3d6" }));
+    // DC barrel jack, also at the top
+    g.appendChild(E("rect", { x:104, y:40, width:40, height:34, rx:6, fill:"#15110c", stroke:"#000" }));
+    g.appendChild(E("circle", { cx:124, cy:57, r:7, fill:"#3a3027" }));
+    // labels
+    var t = E("text", { x:99, y:300, fill:"#cdeedd", "font-family":"monospace", "font-size":13, "font-weight":700, "text-anchor":"middle", transform:"rotate(-90 99 300)" }); t.textContent = "MEGA 2560"; g.appendChild(t);
+    var away = E("text", { x:99, y:22, fill:"#9bb0a4", "font-family":"monospace", "font-size":9, "font-weight":700, "text-anchor":"middle" }); away.textContent = "USB / POWER  (facing away)"; g.appendChild(away);
+    // pin ports on the right edge
+    Object.keys(PORTS).forEach(function(key){
+      var p = PORTS[key];
+      g.appendChild(E("rect", { x:158, y:p.y-9, width:18, height:18, rx:3, fill:"#0a5a31" }));
+      g.appendChild(E("circle", { id:"port_"+key, cx:PORT_X, cy:p.y, r:3.6, fill:"#e9c46a" }));
+      var lab = E("text", { x:150, y:p.y+4, fill:"#cdeedd", "font-family":"monospace", "font-size":10, "font-weight":800, "text-anchor":"end" }); lab.textContent = p.label; g.appendChild(lab);
+    });
+
+    // ===== Breadboard body =====
+    g.appendChild(E("rect", { x:198, y:70, width:308, height:gridBottom-70+10, rx:10, fill:"#f3ecdb", stroke:"#d6c8a6", "stroke-width":1.5 }));
+    // centre trough (vertical)
+    g.appendChild(E("rect", { x:352, y:84, width:20, height:gridBottom-84, fill:"#e7dcc1" }));
+    g.appendChild(E("line", { x1:362, y1:84, x2:362, y2:gridBottom, stroke:"#cdbf9c", "stroke-width":1, "stroke-dasharray":"3 3" }));
+
+    // rails (vertical): left + / - and right - / +
+    function rail(x, color){ g.appendChild(E("line", { x1:x, y1:84, x2:x, y2:gridBottom, stroke:color, "stroke-width":2 })); }
+    rail(RAIL.plus, "#cf3b2f"); rail(RAIL.minus, "#2f6f9e");
+    rail(RRAIL.minus, "#bcd0e0"); rail(RRAIL.plus, "#e8b6b0");
+    g.appendChild(E("text", { x:RAIL.plus, y:80, fill:"#cf3b2f", "font-family":"monospace", "font-size":11, "font-weight":800, "text-anchor":"middle" })).textContent = "+";
+    g.appendChild(E("text", { x:RAIL.minus, y:80, fill:"#2f6f9e", "font-family":"monospace", "font-size":11, "font-weight":800, "text-anchor":"middle" })).textContent = "−";
+
+    // row letters across the top
+    var rows = ["a","b","c","d","e","f","g","h","i","j"];
+    rows.forEach(function(r){
+      var t2 = E("text", { x:ROWX[r], y:80, fill:"#a8997a", "font-family":"monospace", "font-size":9, "text-anchor":"middle" }); t2.textContent = r; g.appendChild(t2);
+    });
+
+    // hole grid + rail holes + column numbers
+    for (var c = 1; c <= BOARD_COLS; c++){
+      var y = colY(c);
+      rows.forEach(function(r){
+        g.appendChild(E("circle", { cx:ROWX[r], cy:y, r:1.9, fill:"#cdbf9c" }));
+      });
+      // rail holes (left + right)
+      [RAIL.plus, RAIL.minus, RRAIL.minus, RRAIL.plus].forEach(function(rx){
+        g.appendChild(E("circle", { cx:rx, cy:y, r:1.7, fill:"#b7c6d2" }));
+      });
+      // column number every 5 (and column 1)
+      if (c === 1 || c % 5 === 0){
+        var cn = E("text", { x:248, y:y+3, fill:"#9c7a44", "font-family":"monospace", "font-size":8.5, "font-weight":800, "text-anchor":"end" }); cn.textContent = c; g.appendChild(cn);
+      }
+    }
+    // "1" call-out at the very top-left so orientation is unmistakable
+    var one = E("text", { x:248, y:colY(1)+3, fill:"#b56712", "font-family":"monospace", "font-size":10, "font-weight":900, "text-anchor":"end" }); one.textContent = "1"; g.appendChild(one);
+  })();
+
+  /* ---- drawing primitives (operate on a step layer <g>) ---- */
+  function portToRail(g, portKey, railX, atCol, color){
+    var p = PORTS[portKey], y = colY(atCol);
+    poly(g, PORT_X+" "+p.y+" "+railX+" "+p.y+" "+railX+" "+y, color, 3.4);
+    dot(g, PORT_X, p.y, color); dot(g, railX, y, color);
+  }
+  function railToHole(g, railX, col, row, color){
+    var y = colY(col), x = ROWX[row];
+    poly(g, railX+" "+y+" "+x+" "+y, color, 3.2);
+    dot(g, railX, y, color); dot(g, x, y, color);
+  }
+  function portToHole(g, portKey, col, row, color){
+    var p = PORTS[portKey], y = colY(col), x = ROWX[row];
+    poly(g, PORT_X+" "+p.y+" "+x+" "+p.y+" "+x+" "+y, color, 3.2);
+    dot(g, PORT_X, p.y, color); dot(g, x, y, color);
+  }
+  function resistorToRail(g, col, row, railX, bands){
+    var y = colY(col), x1 = ROWX[row], x0 = railX, mid = (x0 + x1) / 2;
+    g.appendChild(E("line", { x1:x0, y1:y, x2:x1, y2:y, stroke:"#9a8050", "stroke-width":2 }));
+    g.appendChild(E("rect", { x:mid-12, y:y-6, width:24, height:12, rx:5, fill:"#c9a36b", stroke:"#9c7a44" }));
+    (bands||["#c0392b","#c0392b","#5b3a1e","#d4af37"]).forEach(function(cc, i){
+      g.appendChild(E("rect", { x:(mid-8)+i*4.2, y:y-6, width:1.9, height:12, fill:cc }));
+    });
+    dot(g, x0, y, "#9a8050"); dot(g, x1, y, "#9a8050");
+  }
+  function led(g, colPlus, colMinus, row, body, edge){
+    var x = ROWX[row], yp = colY(colPlus), ym = colY(colMinus), mid = (yp+ym)/2;
+    g.appendChild(E("line", { x1:x, y1:yp, x2:x, y2:mid, stroke:body, "stroke-width":2.6 }));      // long (+)
+    g.appendChild(E("line", { x1:x, y1:ym, x2:x, y2:mid, stroke:"#9a9387", "stroke-width":2.6 }));  // short (-)
+    g.appendChild(E("ellipse", { cx:x+9, cy:mid, rx:11, ry:10, fill:body, stroke:edge, "stroke-width":1.4 }));
+    g.appendChild(E("ellipse", { cx:x+5, cy:mid-3, rx:3, ry:2.5, fill:"#fff", opacity:.55 }));
+    var pl = E("text", { x:x-7, y:yp+3, fill:edge, "font-size":7.5, "font-weight":800, "font-family":"monospace", "text-anchor":"end" }); pl.textContent="+"; g.appendChild(pl);
+    var ml = E("text", { x:x-7, y:ym+3, fill:"#6f6a60", "font-size":7.5, "font-weight":800, "font-family":"monospace", "text-anchor":"end" }); ml.textContent="−"; g.appendChild(ml);
+    dot(g, x, yp, body); dot(g, x, ym, "#9a9387");
+  }
+  function pushButton(g, colA, colB){
+    var yA = colY(colA), yB = colY(colB), x0 = ROWX.e-4, x1 = ROWX.f+4;
+    g.appendChild(E("rect", { x:x0, y:yA-4, width:x1-x0, height:(yB-yA)+8, rx:5, fill:"#3a3a3a", stroke:"#222" }));
+    g.appendChild(E("circle", { cx:(x0+x1)/2, cy:(yA+yB)/2, r:9, fill:"#cf3b2f", stroke:"#8f261d" }));
+    // legs into a-e (rows e) and f-j (row f) of both columns
+    [yA, yB].forEach(function(yy){
+      g.appendChild(E("line", { x1:ROWX.e, y1:yy, x2:x0, y2:yy, stroke:"#9a9387", "stroke-width":2 }));
+      g.appendChild(E("line", { x1:x1, y1:yy, x2:ROWX.f, y2:yy, stroke:"#9a9387", "stroke-width":2 }));
+      dot(g, ROWX.e, yy, "#9a9387"); dot(g, ROWX.f, yy, "#9a9387");
+    });
+    var lab = E("text", { x:(x0+x1)/2, y:yA-8, fill:"#6f6a60", "font-size":7.5, "font-weight":800, "font-family":"monospace", "text-anchor":"middle" }); lab.textContent="button"; g.appendChild(lab);
+  }
+
+  /* ---- relay module body: a labelled blue block straddling rows c-h,
+         spanning the IN/VCC/GND columns, with coil + NO/NC contacts and
+         a red LED load on the NO side ---- */
+  function relayModule(g, colIN, colVCC, colGND){
+    var yT = colY(colIN) - 14, yB = colY(colGND) + 14;
+    var bx0 = ROWX.c - 6, bx1 = ROWX.h + 6;        // box spans across the a-e/f-j halves
+    // blue body
+    g.appendChild(E("rect", { x:bx0, y:yT, width:bx1-bx0, height:yB-yT, rx:7, fill:"#2f6fb0", stroke:"#1f4d80", "stroke-width":2 }));
+    g.appendChild(E("text", { x:(bx0+bx1)/2, y:yT+15, fill:"#eaf2fb", "font-family":"monospace", "font-size":10, "font-weight":800, "text-anchor":"middle" })).textContent = "RELAY 5V";
+    // inner coil + contacts schematic
+    var cy = (yT+yB)/2;
+    g.appendChild(E("rect", { x:bx0+10, y:cy-12, width:18, height:24, rx:3, fill:"#214f78", stroke:"#16395a" }));      // coil block
+    g.appendChild(E("text", { x:bx0+19, y:cy+27, fill:"#bcd6ef", "font-family":"monospace", "font-size":7, "font-weight":700, "text-anchor":"middle" })).textContent = "coil";
+    // armature + NO/NC pads
+    var px = bx0+40, ax = bx1-22;
+    g.appendChild(E("circle", { cx:px, cy:cy, r:3, fill:"#cbb98c" }));                                                  // pivot (COM)
+    g.appendChild(E("line", { x1:px, y1:cy, x2:ax, y2:cy-8, stroke:"#e9c46a", "stroke-width":3, "stroke-linecap":"round" })); // armature to NC (idle)
+    g.appendChild(E("circle", { cx:ax, cy:cy-8, r:3.4, fill:"#7e94a8" }));                                              // NC pad
+    g.appendChild(E("text", { x:ax+6, y:cy-6, fill:"#cfe0ee", "font-family":"monospace", "font-size":7, "font-weight":700, "text-anchor":"start" })).textContent = "NC";
+    g.appendChild(E("circle", { cx:ax, cy:cy+10, r:3.4, fill:"#e0473b" }));                                             // NO pad (LED load)
+    g.appendChild(E("text", { x:ax+6, y:cy+13, fill:"#ffd9d4", "font-family":"monospace", "font-size":7, "font-weight":700, "text-anchor":"start" })).textContent = "NO";
+    // little load LED on NO
+    g.appendChild(E("circle", { cx:ax, cy:cy+24, r:5, fill:"#e0473b", stroke:"#b22f24", "stroke-width":1.2 }));
+    g.appendChild(E("line", { x1:ax, y1:cy+13, x2:ax, y2:cy+19, stroke:"#9a9387", "stroke-width":1.6 }));
+    // three labelled header pins reaching down into the a-e holes
+    var pins = [ [colIN,"IN"], [colVCC,"VCC"], [colGND,"GND"] ];
+    pins.forEach(function(pr){
+      var yy = colY(pr[0]), xh = ROWX.a;
+      g.appendChild(E("line", { x1:bx0, y1:yy, x2:xh, y2:yy, stroke:"#cbb98c", "stroke-width":2 }));
+      g.appendChild(E("circle", { cx:bx0, cy:yy, r:2.6, fill:"#1f4d80" }));
+      dot(g, xh, yy, "#cbb98c");
+      g.appendChild(E("text", { x:bx0-3, y:yy-4, fill:"#eaf2fb", "font-family":"monospace", "font-size":7.5, "font-weight":800, "text-anchor":"end" })).textContent = pr[1];
+    });
+  }
+
+  /* ---- build the wiring step layers (relay-specific) ---- */
+  var R_IN = 4, R_VCC = 5, R_GND = 6;   // columns for the three header pins
+  (function buildLayers(){
+    var host = document.getElementById("bbLayers");
+    function layer(i){ var g = E("g", { "class":"layer", "data-layer":i }); host.appendChild(g); return g; }
+
+    var g0 = layer(0); relayModule(g0, R_IN, R_VCC, R_GND);              // seat the module
+
+    var g1 = layer(1); portToHole(g1, "D8", R_IN, "a", "#e8821e");       // IN -> pin 8
+
+    var g2 = layer(2); portToHole(g2, "5V", R_VCC, "a", "#cf3b2f");      // VCC -> 5V
+
+    var g3 = layer(3); portToHole(g3, "GND", R_GND, "a", "#222");        // GND -> GND
+  })();
+
+  /* ============================================================
+     Wiring step machine (progressive reveal)
+     ============================================================ */
+  var layers = [].slice.call(document.querySelectorAll("#bb .layer"));
+  var stepCards = [].slice.call(document.querySelectorAll(".step-card"));
+  var heads = [].slice.call(document.querySelectorAll(".step-head"));
+  var prevBtn = document.getElementById("prevStep"), nextBtn = document.getElementById("nextStep");
+  var dotsWrap = document.getElementById("stepDots"), diagDesc = document.getElementById("diagDesc");
+  var stepCallout = document.getElementById("stepCallout");
+  var stepNames = ["Seat the relay","IN to pin 8","VCC to 5V","GND to GND"];
+  var callouts = [
+    "Add now: seat the relay module's three header pins (IN, VCC, GND) into columns 4-6.",
+    "Add now: signal wire from Mega pin 8 to the relay's IN pin (column 4).",
+    "Add now: red 5V wire from the Mega to the relay's VCC pin (column 5).",
+    "Add now: black GND wire from the Mega to the relay's GND pin (column 6)."
+  ];
+  var TOTAL = 4, current = 0, dots = [];
+  for (var i = 0; i < TOTAL; i++){
+    (function(idx){
+      var b = document.createElement("button");
+      b.type = "button"; b.setAttribute("role","tab");
+      b.setAttribute("aria-label","Go to step "+idx+": "+stepNames[idx]);
+      b.addEventListener("click", function(){ goStep(idx, {scroll:true}); });
+      dotsWrap.appendChild(b); dots.push(b);
+    })(i);
+  }
+  function applyLayers(){
+    layers.forEach(function(L){
+      var n = parseInt(L.getAttribute("data-layer"),10);
+      L.style.transition = "opacity .3s ease";
+      if (n === current){ L.style.opacity = "1"; L.style.filter = "drop-shadow(0 2px 5px rgba(0,0,0,.22))"; }
+      else if (n < current){ L.style.opacity = "0.45"; L.style.filter = "none"; }
+      else { L.style.opacity = "0"; L.style.filter = "none"; }
+    });
+    Object.keys(PORTS).forEach(function(k){
+      var p = document.getElementById("port_"+k); if (!p) return;
+      p.setAttribute("r","3.6"); p.style.filter = "none";
+    });
+  }
+  function setCards(){
+    stepCards.forEach(function(card){
+      var n = parseInt(card.getAttribute("data-step"),10), active = (n === current);
+      card.classList.toggle("is-active", active);
+      var h = card.querySelector(".step-head"); if (h) h.setAttribute("aria-expanded", active?"true":"false");
+    });
+    dots.forEach(function(d, idx){ d.setAttribute("aria-current", idx===current?"true":"false"); });
+    prevBtn.disabled = (current === 0);
+    nextBtn.disabled = (current === TOTAL-1);
+    nextBtn.innerHTML = (current === TOTAL-1) ? "All wired ✓" : "Next →";
+    if (diagDesc) diagDesc.textContent = "Step "+current+": "+stepNames[current]+".";
+    if (stepCallout) stepCallout.textContent = callouts[current];
+  }
+  function goStep(n, opts){
+    current = Math.max(0, Math.min(TOTAL-1, n));
+    applyLayers(); setCards();
+    if (opts && opts.scroll && stepCards[current]) stepCards[current].scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+  prevBtn.addEventListener("click", function(){ goStep(current-1, {scroll:true}); });
+  nextBtn.addEventListener("click", function(){ goStep(current+1, {scroll:true}); });
+  heads.forEach(function(h){ h.addEventListener("click", function(){ goStep(parseInt(h.closest(".step-card").getAttribute("data-step"),10)); }); });
+  document.getElementById("stepsPanel").addEventListener("keydown", function(e){
+    if (e.key==="ArrowRight"||e.key==="ArrowDown"){ e.preventDefault(); goStep(current+1); }
+    else if (e.key==="ArrowLeft"||e.key==="ArrowUp"){ e.preventDefault(); goStep(current-1); }
+  });
+  goStep(0);
+
+  /* ============================================================
+     CODE block + code-follower
+     Each line is an array entry; {h:html, id:tag} so the sim can
+     highlight the line(s) currently running on the board.
+     ============================================================ */
+  var CODE = [
+    {h:'<span class="kw">int</span> <span class="id">relayPin</span> = <span class="num">8</span>;     <span class="cm">// relay IN pin (drives the coil)</span>'},
+    {h:''},
+    {h:'<span class="kw">void</span> <span class="fn">setup</span>() {', id:"setup"},
+    {h:'  <span class="fn">pinMode</span>(<span class="id">relayPin</span>, <span class="kw">OUTPUT</span>);   <span class="cm">// drive it like an LED</span>', id:"setup"},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);          <span class="cm">// open the monitor link</span>', id:"setup"},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"Relay ready - clicking on and off."</span>);', id:"setup"},
+    {h:'}'},
+    {h:''},
+    {h:'<span class="kw">void</span> <span class="fn">loop</span>() {'},
+    {h:'  <span class="fn">digitalWrite</span>(<span class="id">relayPin</span>, <span class="kw">HIGH</span>);          <span class="cm">// coil energized</span>', id:"on"},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"Relay ON  (click) -&gt; NO contact closed"</span>);', id:"on"},
+    {h:'  <span class="fn">delay</span>(<span class="num">1500</span>);', id:"on"},
+    {h:''},
+    {h:'  <span class="fn">digitalWrite</span>(<span class="id">relayPin</span>, <span class="kw">LOW</span>);           <span class="cm">// coil released</span>', id:"off"},
+    {h:'  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"Relay OFF (click) -&gt; NO contact open"</span>);', id:"off"},
+    {h:'  <span class="fn">delay</span>(<span class="num">1500</span>);', id:"off"},
+    {h:'}'}
+  ];
+  function renderCode(host, miniHost){
+    host.innerHTML = "";
+    CODE.forEach(function(ln){
+      var s = document.createElement("span");
+      s.className = "cl"; if (ln.id) s.setAttribute("data-id", ln.id);
+      s.innerHTML = ln.h || "&nbsp;";
+      host.appendChild(s);
+    });
+    // mini code = just the loop body (ids on/off)
+    miniHost.innerHTML = "";
+    var MINI = [
+      {h:'<span class="fn">digitalWrite</span>(<span class="num">8</span>, <span class="kw">HIGH</span>);', id:"on"},
+      {h:'<span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"Relay ON ..."</span>);', id:"on"},
+      {h:'<span class="fn">delay</span>(<span class="num">1500</span>);', id:"on"},
+      {h:'<span class="fn">digitalWrite</span>(<span class="num">8</span>, <span class="kw">LOW</span>);', id:"off"},
+      {h:'<span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"Relay OFF ..."</span>);', id:"off"},
+      {h:'<span class="fn">delay</span>(<span class="num">1500</span>);', id:"off"}
+    ];
+    MINI.forEach(function(ln){
+      var s = document.createElement("span"); s.className="cl"; s.setAttribute("data-id", ln.id);
+      s.innerHTML = ln.h; miniHost.appendChild(s);
+    });
+  }
+  var codeBlock = document.getElementById("codeBlock");
+  var miniCode = document.getElementById("miniCode");
+  renderCode(codeBlock, miniCode);
+
+  function highlight(id){
+    [codeBlock, miniCode].forEach(function(host){
+      [].forEach.call(host.querySelectorAll(".cl"), function(s){
+        s.classList.toggle("active", !!id && s.getAttribute("data-id") === id);
+      });
+    });
+  }
+
+  /* ============================================================
+     Serial monitor pane
+     ============================================================ */
+  var serialOut = document.getElementById("serialOut");
+  function serialLine(text, muted){
+    var s = document.createElement("span");
+    s.className = "new" + (muted ? " muted" : "");
+    s.textContent = text + "\n";
+    serialOut.appendChild(s);
+    while (serialOut.childNodes.length > 60) serialOut.removeChild(serialOut.firstChild);
+    serialOut.scrollTop = serialOut.scrollHeight;
+    setTimeout(function(){ s.className = muted ? "muted" : ""; }, 500);
+  }
+  serialLine("Relay ready - clicking on and off.", true);
+
+  /* ============================================================
+     Self-running relay simulation (toggle every 1.5s)
+     The armature swings to NO (closing it) with a CLICK label and a
+     small lamp that lights when closed. Highlights digitalWrite/Serial
+     and prints the sketch's exact strings, all in sync.
+     ============================================================ */
+  var heroLed = document.getElementById("heroLed");
+  var armature = document.getElementById("armature");
+  var simLamp = document.getElementById("simLamp");
+  var clickLabel = document.getElementById("clickLabel");
+  var roPin = document.getElementById("roPin"), roState = document.getElementById("roState");
+  var relayOn = false;
+
+  function flashClick(){
+    if (!clickLabel) return;
+    clickLabel.setAttribute("opacity","1");
+    setTimeout(function(){ clickLabel.setAttribute("opacity","0"); }, 360);
+  }
+
+  function setRelay(on){
+    relayOn = on;
+    // armature swings down to NO when energized, back up to NC when released
+    if (armature) armature.style.transform = on ? "rotate(38deg)" : "rotate(0deg)";
+    if (simLamp){
+      simLamp.setAttribute("fill", on ? "#ff5b4d" : "#1a1815");
+      simLamp.setAttribute("stroke", on ? "#ffd9d4" : "#3a352e");
+    }
+    if (heroLed) heroLed.classList.toggle("on", on);
+    flashClick();
+    roPin.textContent = on ? "HIGH (5V)" : "LOW (0V)";
+    roPin.className = "val " + (on ? "hi" : "lo");
+    roState.textContent = on ? "closed" : "open";
+    roState.style.color = on ? "var(--go-d)" : "var(--sky)";
+    // walk the code: digitalWrite -> Serial.println (matching id block)
+    var id = on ? "on" : "off";
+    highlight(id);
+    setTimeout(function(){
+      serialLine(on ? "Relay ON  (click) -> NO contact closed"
+                    : "Relay OFF (click) -> NO contact open");
+    }, 140);
+  }
+
+  // kick off the 1.5s toggle loop
+  setRelay(false);
+  setInterval(function(){ setRelay(!relayOn); }, 1500);
+
+  /* ============================================================
+     Copy buttons
+     ============================================================ */
+  var SKETCH_TEXT = [
+    "/*",
+    " * 28_Relay   (Inland kit Project 28)",
+    " * A relay is an electrically-controlled mechanical switch: a small 5V signal",
+    " * from the Arduino flips a much bigger circuit on or off (you hear it CLICK).",
+    " * Driving it is just like an LED - HIGH energizes the coil. We toggle it on a",
+    " * timer and narrate over Serial so .\\scripts\\monitor.ps1 shows each click.",
+    " *",
+    " * Wiring (Mega 2560):",
+    " *   Relay IN -> pin 8     Relay VCC -> 5V     Relay GND -> GND",
+    " *",
+    " * Watch it:  .\\scripts\\upload.ps1 28_Relay  then  .\\scripts\\monitor.ps1",
+    " */",
+    "",
+    "int relayPin = 8;",
+    "",
+    "void setup() {",
+    "  pinMode(relayPin, OUTPUT);",
+    "  Serial.begin(9600);",
+    "  Serial.println(\"Relay ready - clicking on and off.\");",
+    "}",
+    "",
+    "void loop() {",
+    "  digitalWrite(relayPin, HIGH);                 // coil energized",
+    "  Serial.println(\"Relay ON  (click) -> NO contact closed\");",
+    "  delay(1500);",
+    "",
+    "  digitalWrite(relayPin, LOW);                  // coil released",
+    "  Serial.println(\"Relay OFF (click) -> NO contact open\");",
+    "  delay(1500);",
+    "}"
+  ].join("\n");
+  function flash(btn, ok){ var o = btn.textContent; btn.textContent = ok?"Copied ✓":"Press Ctrl+C"; btn.disabled = true; setTimeout(function(){ btn.textContent=o; btn.disabled=false; }, 1400); }
+  function copyText(text, btn){
+    if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ flash(btn,true); }, function(){ fb(text,btn); }); }
+    else fb(text, btn);
+  }
+  function fb(text, btn){ try{ var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.focus(); ta.select(); var ok=document.execCommand("copy"); document.body.removeChild(ta); flash(btn,ok); }catch(e){ flash(btn,false); } }
+  document.getElementById("copyCode").addEventListener("click", function(){ copyText(SKETCH_TEXT, this); });
+  document.getElementById("copyCmd").addEventListener("click", function(){ copyText(".\\scripts\\upload.ps1 28_Relay", this); });
+  document.getElementById("copyMon").addEventListener("click", function(){ copyText(".\\scripts\\monitor.ps1", this); });
+
+  /* ============================================================
+     Scroll-spy -> nav + progress
+     ============================================================ */
+  var sections = [].slice.call(document.querySelectorAll("main section[id]"));
+  var navLinks = [].slice.call(document.querySelectorAll(".nav-link"));
+  var navFill = document.getElementById("navFill"), navProgress = document.getElementById("navProgress");
+  var progressTrack = document.getElementById("progressTrack"), progressText = document.getElementById("progressText"), progressPct = document.getElementById("progressPct");
+  var mobileNav = document.getElementById("mobileNav");
+  var titles = ["Overview","What a relay is","Wiring it up","The code","Upload","See it run","Troubleshooting","Challenge"];
+  function setActive(idx){
+    navLinks.forEach(function(a,i){ a.classList.toggle("active", i===idx); a.classList.toggle("done", i<idx); });
+    var pct = sections.length>1 ? Math.round((idx/(sections.length-1))*100) : 0;
+    progressTrack.style.setProperty("--pct", pct+"%");
+    progressText.textContent = titles[idx]||""; progressPct.textContent = pct+"%";
+    navProgress.textContent = "Section "+(idx+1)+" of "+sections.length;
+    if (navFill && navLinks.length>1) navFill.style.height = (idx/(navLinks.length-1)*100)+"%";
+    if (mobileNav && mobileNav.selectedIndex !== idx) mobileNav.selectedIndex = idx;
+  }
+  var activeIdx = 0;
+  if ("IntersectionObserver" in window){
+    var visible = {};
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ visible[en.target.id] = en.isIntersecting ? en.intersectionRatio : 0; });
+      var best=-1, bestR=-1;
+      sections.forEach(function(s,i){ var r=visible[s.id]||0; if (r>bestR+0.001){ bestR=r; best=i; } });
+      if (best>=0 && best!==activeIdx){ activeIdx=best; setActive(best); }
+    }, { rootMargin:"-45% 0px -45% 0px", threshold:[0,0.25,0.5,0.75,1] });
+    sections.forEach(function(s){ io.observe(s); });
+  }
+  setActive(0);
+  if (mobileNav) mobileNav.addEventListener("change", function(){ var t=document.querySelector(mobileNav.value); if (t) t.scrollIntoView({behavior:"smooth", block:"start"}); });
+})();
+</script>
+</body>
+</html>
