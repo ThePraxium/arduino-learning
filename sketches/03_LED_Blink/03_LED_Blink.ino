@@ -6,7 +6,7 @@
  *   pin 8 --> 220ohm resistor --> LED long leg (+)
  *   LED short leg (-) --> GND
  *
- * Board:  Inland / Keyestudio Mega 2560 R3
+ * Board:  Mega 2560 (ATmega2560)
  * Upload: .\scripts\upload.ps1 03_LED_Blink
  */
 

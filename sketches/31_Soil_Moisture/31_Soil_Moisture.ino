@@ -1,5 +1,5 @@
 /*
- * 31_Soil_Moisture   (Inland kit Project 31)
+ * 31_Soil_Moisture
  * The soil sensor's two prongs measure how easily current passes through the
  * soil: wetter soil conducts better, giving a higher reading on A0. Read it,
  * label it dry/damp/wet, and narrate over Serial so .\scripts\monitor.ps1

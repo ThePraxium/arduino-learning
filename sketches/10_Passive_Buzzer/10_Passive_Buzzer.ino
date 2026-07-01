@@ -1,5 +1,5 @@
 /*
- * 10_Passive_Buzzer   (Inland kit Project 8)
+ * 10_Passive_Buzzer
  * A PASSIVE buzzer has NO oscillator of its own - it is a tiny speaker.
  * YOU must feed it a frequency with tone(). Different frequencies = different
  * pitches, so we can play a melody. Here we walk up a C-major scale and

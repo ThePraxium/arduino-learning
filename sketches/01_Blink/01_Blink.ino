@@ -2,7 +2,7 @@
  * 01_Blink - the "hello world" of Arduino.
  * Blinks the on-board LED (pin 13 / LED_BUILTIN) once per second.
  *
- * Board: Inland / Keyestudio Mega 2560 R3
+ * Board: Mega 2560 (ATmega2560)
  * Upload:  .\scripts\upload.ps1 01_Blink
  */
 

@@ -1,9 +1,8 @@
-# Arduino Learning — Inland Super Starter Kit (Mega 2560 R3)
+# Arduino Learning — Mega 2560 R3
 
-A command-line workspace for working through the Inland Super Starter Kit
-(Micro Center SKU 052043) using **arduino-cli** — no Arduino IDE needed.
+A command-line workspace for Arduino Mega 2560 projects using **arduino-cli** — no Arduino IDE needed.
 
-- **Board:** Inland / Keyestudio Mega 2560 R3
+- **Board:** Mega 2560 (ATmega2560)
 - **FQBN:** `arduino:avr:mega`
 - **Toolchain:** arduino-cli (installed at `C:\Program Files\Arduino CLI`)
 
@@ -14,7 +13,7 @@ Arduino_learning/
 ├─ sketches/        one folder per sketch (the arduino-cli convention)
 │  └─ 01_Blink/01_Blink.ino
 ├─ learn/           interactive HTML lesson guides — open in a browser
-│  ├─ 06_button_controlled_led.html   (one per kit Project; offline, self-contained)
+│  ├─ 06_button_controlled_led.html   (one per project; offline, self-contained)
 │  └─ _kit/template.html              reusable guide template (portrait diagram engine)
 ├─ scripts/         PowerShell helpers (see below)
 ├─ libraries/       drop hand-installed / custom libraries here
@@ -34,7 +33,7 @@ Run these from the project root in PowerShell.
 | Compile only (catch errors) | `.\scripts\build.ps1 01_Blink` |
 | Compile **and** upload | `.\scripts\upload.ps1 01_Blink` |
 | Open the serial monitor | `.\scripts\monitor.ps1` |
-| Install this kit's libraries | `.\scripts\install-libs.ps1` |
+| Install the project libraries | `.\scripts\install-libs.ps1` |
 
 The upload/monitor scripts auto-detect the board's COM port. If you have several
 serial devices, pass it explicitly: `.\scripts\upload.ps1 01_Blink -Port COM5`.

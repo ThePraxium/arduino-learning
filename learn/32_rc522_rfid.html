@@ -640,7 +640,7 @@ digitalWrite(8, LOW);</pre><p style="margin:0">Swap the LED for a relay and it c
       <div class="finish"><div class="conf" aria-hidden="true">&#127881;</div><h2>You built a card reader!</h2><p style="margin:0 auto;max-width:54ch;color:var(--ink-soft)">You wired a real SPI device, respected its 3.3&nbsp;V power, leaned on a library to handle the radio, and read a unique UID off a battery-less tag &mdash; while the serial monitor named every card. This is the beating heart of badges, hotel keys, and contactless payments. Onward!</p></div>
     </section>
 
-    <footer>Project 32 &middot; RC522 RFID reader &middot; Inland / Keyestudio Mega 2560 R3 &middot; works fully offline</footer>
+    <footer>Project 32 &middot; RC522 RFID reader &middot; Mega 2560 (ATmega2560) &middot; works fully offline</footer>
   </main>
 </div>
 
@@ -1079,7 +1079,7 @@ digitalWrite(8, LOW);</pre><p style="margin:0">Swap the LED for a relay and it c
      ============================================================ */
   var SKETCH_TEXT = [
     "/*",
-    " * 32_RC522_RFID   (Inland kit Project 32)",
+    " * 32_RC522_RFID",
     " * The RC522 reads 13.56 MHz RFID cards/fobs over SPI. Each card has a unique",
     " * ID (UID). When you tap a card we read its UID and print it so",
     " * .\\scripts\\monitor.ps1 shows the card - the basis of any access-card system.",

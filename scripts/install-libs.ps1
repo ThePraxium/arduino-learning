@@ -1,4 +1,4 @@
-# Installs the libraries needed for this kit's projects.
+# Installs the libraries needed for these projects.
 # Safe to re-run; already-installed libraries are skipped.
 # Usage:  .\scripts\install-libs.ps1
 . "$PSScriptRoot\_common.ps1"

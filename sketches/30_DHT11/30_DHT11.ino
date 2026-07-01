@@ -1,5 +1,5 @@
 /*
- * 30_DHT11   (Inland kit Project 30)
+ * 30_DHT11
  * The DHT11 measures temperature AND humidity and sends both over a single
  * data wire. The DHT library does the tricky timing; we just ask for the two
  * numbers every couple of seconds and print them so .\scripts\monitor.ps1

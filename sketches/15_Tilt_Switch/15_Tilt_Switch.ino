@@ -1,5 +1,5 @@
 /*
- * 15_Tilt_Switch   (Inland kit Project 13)
+ * 15_Tilt_Switch
  * A tilt switch is a tube with a metal ball: tip it one way and the ball
  * bridges two contacts (closed), tip it back and the circuit opens. Wired
  * like a button (with a 10k pull-down), it reads HIGH when tilted, LOW when

@@ -1,5 +1,5 @@
 /*
- * 13_Flame_Sensor   (Inland kit Project 11)
+ * 13_Flame_Sensor
  * A flame sensor is an infrared photodiode tuned to the light a flame gives
  * off. Closer/bigger flame -> more IR -> LOWER analog reading on A0. When the
  * reading drops past a threshold we sound the buzzer (a fire alarm!) and

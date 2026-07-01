@@ -388,7 +388,7 @@
       <div class="grid cols-2" style="margin-top:var(--sp-4)">
         <div class="card">
           <h3>What you'll build</h3>
-          <p>A single three-legged <b>IR receiver</b> on the breadboard, wired to <b>pin&nbsp;11</b>, <b>5V</b>, and <b>GND</b>. Point the kit's remote at it, press any key, and the Arduino decodes the pulse and prints the button's code &mdash; like <code>button: 0x45</code> &mdash; straight to the serial monitor.</p>
+          <p>A single three-legged <b>IR receiver</b> on the breadboard, wired to <b>pin&nbsp;11</b>, <b>5V</b>, and <b>GND</b>. Point the remote at it, press any key, and the Arduino decodes the pulse and prints the button's code &mdash; like <code>button: 0x45</code> &mdash; straight to the serial monitor.</p>
           <div class="callout amber"><span class="ic" aria-hidden="true">&#128161;</span><p>No resistor, no LED to wire this time. The whole magic is one part that <b>catches invisible light</b> and a library that <b>turns the flicker into a number</b>.</p></div>
         </div>
         <div class="card">
@@ -403,7 +403,7 @@
 
       <div class="card" style="margin-top:var(--sp-3)">
         <h3>Parts at a glance</h3>
-        <p style="margin-bottom:var(--sp-3)">Just a handful, and almost no fiddly wiring. The star is the <b>IR receiver</b> &mdash; a little black dome with <b>three legs</b>. The <b>remote</b> is the one that came in your kit; its battery tab may need pulling out the first time.</p>
+        <p style="margin-bottom:var(--sp-3)">Just a handful, and almost no fiddly wiring. The star is the <b>IR receiver</b> &mdash; a little black dome with <b>three legs</b>. The <b>remote</b>'s battery tab may need pulling out the first time.</p>
         <ul class="parts">
           <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><path d="M9 20 q8 -13 16 0 z" fill="#1a1a1a"/><rect x="9" y="19" width="16" height="3" fill="#1a1a1a"/><line x1="13" y1="22" x2="13" y2="31" stroke="#9a9387" stroke-width="2"/><line x1="17" y1="22" x2="17" y2="31" stroke="#9a9387" stroke-width="2"/><line x1="21" y1="22" x2="21" y2="31" stroke="#9a9387" stroke-width="2"/></svg></span><span><span class="pname">IR receiver</span><span class="pqty">Qty 1 &middot; 3 legs</span></span></li>
           <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><rect x="11" y="3" width="12" height="28" rx="3" fill="#2a2722" stroke="#4a443a"/><circle cx="17" cy="9" r="2" fill="#7d241b"/><g fill="#6a655c"><rect x="14" y="14" width="2.4" height="2.4"/><rect x="18" y="14" width="2.4" height="2.4"/><rect x="14" y="18" width="2.4" height="2.4"/><rect x="18" y="18" width="2.4" height="2.4"/><rect x="14" y="22" width="2.4" height="2.4"/><rect x="18" y="22" width="2.4" height="2.4"/></g></svg></span><span><span class="pname">IR remote</span><span class="pqty">Qty 1 &middot; the sender</span></span></li>
@@ -631,7 +631,7 @@ if (cmd == <b>0x15</b>) Serial.println(<span style="color:#b6d99a">"button 0"</s
       <div class="finish"><div class="conf" aria-hidden="true">&#127881;</div><h2>Your Arduino listens across the room now!</h2><p style="margin:0 auto;max-width:54ch;color:var(--ink-soft)">You caught invisible infrared light, leaned on a library to decode it, and printed a unique code for every button &mdash; while the serial monitor narrated each press. Reading remote codes is the doorway to building your own remote-controlled gadgets. Onward!</p></div>
     </section>
 
-    <footer>Project 14 &middot; IR Remote Control &middot; Inland / Keyestudio Mega 2560 R3 &middot; works fully offline</footer>
+    <footer>Project 14 &middot; IR Remote Control &middot; Mega 2560 (ATmega2560) &middot; works fully offline</footer>
   </main>
 </div>
 
@@ -1035,7 +1035,7 @@ if (cmd == <b>0x15</b>) Serial.println(<span style="color:#b6d99a">"button 0"</s
      ============================================================ */
   var SKETCH_TEXT = [
     "/*",
-    " * 16_IR_Remote   (Inland kit Project 14)",
+    " * 16_IR_Remote",
     " * The IR receiver listens for the coded pulses from the remote control. The",
     " * IRremote library decodes each press into a number; we print which button",
     " * was pressed over Serial so .\\scripts\\monitor.ps1 reacts to your remote.",

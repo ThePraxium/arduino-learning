@@ -1,5 +1,5 @@
 /*
- * 28_Relay   (Inland kit Project 28)
+ * 28_Relay
  * A relay is an electrically-controlled mechanical switch: a small 5V signal
  * from the Arduino flips a much bigger circuit on or off (you hear it CLICK).
  * Driving it is just like an LED - HIGH energizes the coil. We toggle it on a

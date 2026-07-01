@@ -1,5 +1,5 @@
 /*
- * 16_IR_Remote   (Inland kit Project 14)
+ * 16_IR_Remote
  * The IR receiver listens for the coded pulses from the remote control. The
  * IRremote library decodes each press into a number; we print which button
  * was pressed over Serial so .\scripts\monitor.ps1 reacts to your remote.

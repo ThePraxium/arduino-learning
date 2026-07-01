@@ -1,5 +1,5 @@
 /*
- * 27_Joystick   (Inland kit Project 27)
+ * 27_Joystick
  * A joystick is just two potentiometers (X and Y) plus a push button (SW).
  * Read X and Y on analog pins (0..1023, centre ~512) and the button on a
  * digital pin. We stream all three over Serial so .\scripts\monitor.ps1

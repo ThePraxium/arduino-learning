@@ -606,7 +606,7 @@ Serial.println(days[now.<b>dayOfTheWeek</b>()]);</pre><p style="margin:0">Hint: 
       <div class="finish"><div class="conf" aria-hidden="true">&#127881;</div><h2>Your Arduino keeps time now!</h2><p style="margin:0 auto;max-width:54ch;color:var(--ink-soft)">You spoke to a real chip over the <code>I2C</code> bus, leaned on a <code>library</code> instead of raw bytes, and formatted six numbers into a tidy timestamp with <code>sprintf</code> &mdash; while the serial monitor ticked like a clock. Real-time clocks power alarms, data loggers, and schedulers everywhere. Onward!</p></div>
     </section>
 
-    <footer>Project 29 &middot; DS3231 Real-Time Clock &middot; Inland / Keyestudio Mega 2560 R3 &middot; works fully offline</footer>
+    <footer>Project 29 &middot; DS3231 Real-Time Clock &middot; Mega 2560 (ATmega2560) &middot; works fully offline</footer>
   </main>
 </div>
 
@@ -1060,7 +1060,7 @@ Serial.println(days[now.<b>dayOfTheWeek</b>()]);</pre><p style="margin:0">Hint: 
      ============================================================ */
   var SKETCH_TEXT = [
     "/*",
-    " * 29_DS3231_Clock   (Inland kit Project 29)",
+    " * 29_DS3231_Clock",
     " * The DS3231 is a battery-backed real-time clock on the I2C bus. It keeps the",
     " * date and time even when the Arduino is off. We read it once a second and",
     " * print it so .\\scripts\\monitor.ps1 becomes a ticking clock.",

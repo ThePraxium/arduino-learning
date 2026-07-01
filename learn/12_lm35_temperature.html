@@ -380,7 +380,7 @@
 
       <div class="card" style="margin-top:var(--sp-3)">
         <h3>Parts at a glance</h3>
-        <p style="margin-bottom:var(--sp-3)">Just three things plus the board &mdash; the simplest wiring in the whole kit. The star is the <b>LM35</b>: a little black half-moon chip with three legs. Hold it with the <b>flat side facing you</b> and the legs are, left to right, <b>5V &middot; A0 (output) &middot; GND</b>.</p>
+        <p style="margin-bottom:var(--sp-3)">Just three things plus the board &mdash; the simplest wiring of any project here. The star is the <b>LM35</b>: a little black half-moon chip with three legs. Hold it with the <b>flat side facing you</b> and the legs are, left to right, <b>5V &middot; A0 (output) &middot; GND</b>.</p>
         <ul class="parts">
           <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><path d="M8 18 a9 9 0 0 1 18 0 Z" fill="#222" stroke="#000"/><line x1="11" y1="18" x2="11" y2="30" stroke="#888" stroke-width="2"/><line x1="17" y1="18" x2="17" y2="31" stroke="#888" stroke-width="2"/><line x1="23" y1="18" x2="23" y2="30" stroke="#888" stroke-width="2"/></svg></span><span><span class="pname">LM35 sensor</span><span class="pqty">Qty 1 &middot; TO-92 package</span></span></li>
           <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><rect x="4" y="7" width="26" height="20" rx="3" fill="#f3ecdb" stroke="#cbbd9d"/><g fill="#cbbd9d"><circle cx="9" cy="13" r="1"/><circle cx="13" cy="13" r="1"/><circle cx="17" cy="13" r="1"/><circle cx="21" cy="13" r="1"/><circle cx="25" cy="13" r="1"/></g></svg></span><span><span class="pname">Breadboard</span><span class="pqty">Qty 1 &middot; holds the sensor</span></span></li>
@@ -593,7 +593,7 @@ if (tempC &gt; 30.0) {
       <div class="finish"><div class="conf" aria-hidden="true">&#127881;</div><h2>Your Arduino can sense the world!</h2><p style="margin:0 auto;max-width:54ch;color:var(--ink-soft)">You read an <code>analog</code> voltage with <code>analogRead</code>, converted raw counts into volts and then degrees, and streamed live data to the serial monitor once a second. Reading sensors and turning them into numbers is the heart of every weather station, thermostat, and robot ahead. Onward!</p></div>
     </section>
 
-    <footer>Project 12 &middot; LM35 Temperature Sensor &middot; Inland / Keyestudio Mega 2560 R3 &middot; works fully offline</footer>
+    <footer>Project 12 &middot; LM35 Temperature Sensor &middot; Mega 2560 (ATmega2560) &middot; works fully offline</footer>
   </main>
 </div>
 
@@ -876,7 +876,7 @@ if (tempC &gt; 30.0) {
      ============================================================ */
   var CODE = [
     {h:'<span class="cm">/*</span>'},
-    {h:'<span class="cm"> * 14_LM35_Temperature   (Inland kit Project 12)</span>'},
+    {h:'<span class="cm"> * 14_LM35_Temperature</span>'},
     {h:'<span class="cm"> * The LM35 outputs a voltage straight in proportion to temperature:</span>'},
     {h:'<span class="cm"> * 10 mV per degree C. Read that voltage on A0, do a little math, and you have</span>'},
     {h:'<span class="cm"> * degrees C - no library needed. We print the temperature once a second so</span>'},
@@ -1019,7 +1019,7 @@ if (tempC &gt; 30.0) {
      ============================================================ */
   var SKETCH_TEXT = [
     "/*",
-    " * 14_LM35_Temperature   (Inland kit Project 12)",
+    " * 14_LM35_Temperature",
     " * The LM35 outputs a voltage straight in proportion to temperature:",
     " * 10 mV per degree C. Read that voltage on A0, do a little math, and you have",
     " * degrees C - no library needed. We print the temperature once a second so",

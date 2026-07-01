@@ -1,5 +1,5 @@
 /*
- * 29_DS3231_Clock   (Inland kit Project 29)
+ * 29_DS3231_Clock
  * The DS3231 is a battery-backed real-time clock on the I2C bus. It keeps the
  * date and time even when the Arduino is off. We read it once a second and
  * print it so .\scripts\monitor.ps1 becomes a ticking clock.

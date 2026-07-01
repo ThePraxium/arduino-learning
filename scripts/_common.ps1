@@ -4,7 +4,7 @@
 $ArduinoCliDir = "C:\Program Files\Arduino CLI"
 if (Test-Path $ArduinoCliDir) { $env:Path = "$ArduinoCliDir;$env:Path" }
 
-# Board: Inland / Keyestudio Mega 2560 R3  ->  arduino:avr:mega (default cpu = atmega2560)
+# Board: Mega 2560 (ATmega2560)  ->  arduino:avr:mega (default cpu = atmega2560)
 $script:FQBN = "arduino:avr:mega"
 $script:BAUD = 9600
 

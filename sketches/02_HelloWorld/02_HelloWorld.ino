@@ -1,10 +1,10 @@
 /*
- * 02_HelloWorld - the kit's first project.
+ * 02_HelloWorld - the first project.
  * Prints "Hello World!" over serial. Send the letter 'R' from the
  * serial monitor to blink the on-board LED and reprint the message.
  *
  * Wiring: none - just the USB cable.
- * Board:  Inland / Keyestudio Mega 2560 R3
+ * Board:  Mega 2560 (ATmega2560)
  * Upload: .\scripts\upload.ps1 02_HelloWorld
  * View:   .\scripts\monitor.ps1   (9600 baud)
  */

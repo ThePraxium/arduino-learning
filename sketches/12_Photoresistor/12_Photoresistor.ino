@@ -1,5 +1,5 @@
 /*
- * 12_Photoresistor   (Inland kit Project 10)
+ * 12_Photoresistor
  * A photoresistor (LDR) changes resistance with light. Wired as a voltage
  * divider with a 10k resistor, it turns "how bright is the room" into a
  * number on analog pin A0 (0..1023). We use that number to set an LED's

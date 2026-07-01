@@ -7,7 +7,7 @@
  *   Pot left leg  -> 5V        Pot middle leg -> A0        Pot right leg -> GND
  *   LED circuit unchanged (pin 10 -> resistor -> LED -> GND)
  *
- * Board:  Inland / Keyestudio Mega 2560 R3
+ * Board:  Mega 2560 (ATmega2560)
  * Upload: .\scripts\upload.ps1 05_Potentiometer_PWM
  * Watch:  .\scripts\monitor.ps1
  */

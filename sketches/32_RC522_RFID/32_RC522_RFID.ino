@@ -1,5 +1,5 @@
 /*
- * 32_RC522_RFID   (Inland kit Project 32)
+ * 32_RC522_RFID
  * The RC522 reads 13.56 MHz RFID cards/fobs over SPI. Each card has a unique
  * ID (UID). When you tap a card we read its UID and print it so
  * .\scripts\monitor.ps1 shows the card - the basis of any access-card system.

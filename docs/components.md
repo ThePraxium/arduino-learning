@@ -1,7 +1,7 @@
-# Inland Super Starter Kit (Mega 2560 R3) — Component Reference
+# Mega 2560 R3 — Component Reference
 
-Micro Center SKU **052043**. The board is a Keyestudio-made Mega 2560 R3
-(ATmega2560, 16 MHz, 256 KB flash, 8 KB SRAM, 4 KB EEPROM). 32 tutorial projects.
+The board is a Mega 2560 R3
+(ATmega2560, 16 MHz, 256 KB flash, 8 KB SRAM, 4 KB EEPROM). 32 projects.
 
 FQBN for arduino-cli: **`arduino:avr:mega`**
 

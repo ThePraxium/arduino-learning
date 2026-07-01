@@ -1,5 +1,5 @@
 /*
- * 14_LM35_Temperature   (Inland kit Project 12)
+ * 14_LM35_Temperature
  * The LM35 outputs a voltage straight in proportion to temperature:
  * 10 mV per degree C. Read that voltage on A0, do a little math, and you have
  * degrees C - no library needed. We print the temperature once a second so

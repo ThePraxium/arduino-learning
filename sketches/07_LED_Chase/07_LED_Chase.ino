@@ -13,7 +13,7 @@
  * It also PRINTS each step over USB so you can follow the code live:
  *   .\scripts\monitor.ps1            (9600 baud, matches Serial.begin below)
  *
- * Board:  Inland / Keyestudio Mega 2560 R3
+ * Board:  Mega 2560 (ATmega2560)
  * Upload: .\scripts\upload.ps1 07_LED_Chase
  */
 

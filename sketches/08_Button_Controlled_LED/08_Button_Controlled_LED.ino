@@ -1,5 +1,5 @@
 /*
- * 08_Button_Controlled_LED   (Inland kit Project 6)
+ * 08_Button_Controlled_LED
  * Your first INPUT project: until now the Arduino only TALKED (it drove
  * LEDs). Now it also LISTENS - it reads a push button and reacts, and it
  * NARRATES every change over Serial so .\scripts\monitor.ps1 shows it live.

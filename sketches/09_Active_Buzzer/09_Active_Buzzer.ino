@@ -1,5 +1,5 @@
 /*
- * 09_Active_Buzzer   (Inland kit Project 7)
+ * 09_Active_Buzzer
  * An ACTIVE buzzer has its own oscillator inside: give it power and it
  * makes one fixed tone. So driving it is exactly like blinking an LED -
  * HIGH = sound, LOW = silence. We narrate each beep over Serial so

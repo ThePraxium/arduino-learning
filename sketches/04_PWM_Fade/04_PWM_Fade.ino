@@ -2,7 +2,7 @@
  * 04_PWM_Fade - smoothly fade the LED brighter and dimmer (no on/off).
  * Uses analogWrite() / PWM on pin 10. Same wiring as 03_LED_Blink.
  *
- * Board:  Inland / Keyestudio Mega 2560 R3
+ * Board:  Mega 2560 (ATmega2560)
  * Upload: .\scripts\upload.ps1 04_PWM_Fade
  */
 

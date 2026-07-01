@@ -1,5 +1,5 @@
 /*
- * 11_RGB_LED   (Inland kit Project 9)
+ * 11_RGB_LED
  * An RGB LED is three LEDs (red, green, blue) in one dome sharing a common
  * cathode (-). By PWM-dimming each colour with analogWrite() and mixing them,
  * we make any colour. We narrate the current R,G,B mix over Serial so

@@ -380,7 +380,7 @@
 
       <div class="card" style="margin-top:var(--sp-3)">
         <h3>Parts at a glance</h3>
-        <p style="margin-bottom:var(--sp-3)">Four things, straight from the kit's Project&nbsp;9 parts panel. The star is the <b>RGB LED</b> &mdash; notice it has <b>four legs</b>, not two, and one is clearly longer (that's the shared ground). You'll use <b>three identical 220&nbsp;&Omega;</b> resistors (red&ndash;red&ndash;brown&ndash;gold), one per colour.</p>
+        <p style="margin-bottom:var(--sp-3)">Four things for this project. The star is the <b>RGB LED</b> &mdash; notice it has <b>four legs</b>, not two, and one is clearly longer (that's the shared ground). You'll use <b>three identical 220&nbsp;&Omega;</b> resistors (red&ndash;red&ndash;brown&ndash;gold), one per colour.</p>
         <ul class="parts">
           <li class="part"><span class="pico" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="15" r="8" fill="none" stroke="#9a9387" stroke-width="1.4"/><path d="M11 15a6 6 0 0 1 12 0z" fill="#e0473b"/><path d="M11 15a6 6 0 0 0 6 6 6 6 0 0 0 3-1.6z" fill="#2faa55"/><path d="M17 21a6 6 0 0 0 6-6h-6z" fill="#2f8fc0"/><line x1="11" y1="23" x2="11" y2="32" stroke="#888" stroke-width="2"/><line x1="15" y1="23" x2="15" y2="32" stroke="#888" stroke-width="2"/><line x1="19" y1="23" x2="19" y2="33" stroke="#888" stroke-width="2"/><line x1="23" y1="23" x2="23" y2="32" stroke="#888" stroke-width="2"/></svg></span><span><span class="pname">RGB LED</span><span class="pqty">Qty 1 &middot; common cathode</span></span></li>
           <li class="part"><span class="pico" aria-hidden="true"><svg width="40" height="34" viewBox="0 0 40 34"><line x1="2" y1="17" x2="38" y2="17" stroke="#888" stroke-width="2"/><rect x="9" y="11" width="22" height="12" rx="6" fill="#c9a36b"/><rect x="13" y="11" width="2.4" height="12" fill="#c0392b"/><rect x="17" y="11" width="2.4" height="12" fill="#c0392b"/><rect x="21" y="11" width="2.4" height="12" fill="#5b3a1e"/><rect x="26" y="11" width="2.4" height="12" fill="#d4af37"/></svg></span><span><span class="pname">220&nbsp;&Omega; resistor</span><span class="pqty">Qty 3 &middot; one per colour</span></span></li>
@@ -397,7 +397,7 @@
       <div class="grid cols-2">
         <div class="card">
           <h3>What's inside the little dome</h3>
-          <p>An RGB LED isn't magic &mdash; it's just <b>three separate LEDs</b> (red, green, blue) packed into one clear shell. Each colour has its own leg, plus they all share <b>one common leg</b>. In our kit that shared leg is the <b>cathode</b> (the &minus; side), so it goes to <b>GND</b>.</p>
+          <p>An RGB LED isn't magic &mdash; it's just <b>three separate LEDs</b> (red, green, blue) packed into one clear shell. Each colour has its own leg, plus they all share <b>one common leg</b>. In our RGB LED that shared leg is the <b>cathode</b> (the &minus; side), so it goes to <b>GND</b>.</p>
           <p style="margin-bottom:0">The <b>longest leg</b> is that common ground. The other three control red, green and blue &mdash; each one driven by its own PWM pin through a 220&nbsp;&Omega; resistor.</p>
         </div>
         <div class="card">
@@ -449,7 +449,7 @@
               <p class="scaffold">The RGB LED has <b>four legs</b>. Spread them so each sits in its own column on the <b>a&ndash;e half</b>, around row&nbsp;d.</p>
               <ol>
                 <li>Push the legs into <span class="col-pill">column 3</span>, <span class="col-pill">column 4</span>, <span class="col-pill">column 5</span> and <span class="col-pill">column 6</span> at <b>row d</b>.</li>
-                <li>The order on most kit LEDs is <b>red</b>, <b>common</b>, <b>green</b>, <b>blue</b> &mdash; the <b>longest leg</b> is the common ground.</li>
+                <li>The order on most common-cathode RGB LEDs is <b>red</b>, <b>common</b>, <b>green</b>, <b>blue</b> &mdash; the <b>longest leg</b> is the common ground.</li>
               </ol>
               <div class="reuse-note">Tip: gently fan the legs apart so each drops into a <b>separate column</b>. Four legs = four columns.</div>
             </div>
@@ -581,7 +581,7 @@ R:0 G:0 B:255   (blue)</pre>
       <div class="trouble">
         <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#127752;</span> Only one or two colours ever light<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>The monitor prints all the right mixes (e.g. <code>R:0 G:255 B:0 (green)</code>) but a colour never appears on the dome. That channel's wire is loose or on the wrong pin.</p><div class="fix"><b>Fix:</b> Trace each colour leg through its 220&nbsp;&Omega; to the right pin: red&nbsp;&rarr;&nbsp;<code>9</code>, green&nbsp;&rarr;&nbsp;<code>10</code>, blue&nbsp;&rarr;&nbsp;<code>11</code>. Make sure each resistor and leg share a column.</div></div></details>
         <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#9899;</span> The LED stays completely dark<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>The monitor scrolls colours but nothing glows. The <b>common leg probably isn't grounded</b>, or the GND wire never reached the (&minus;) rail.</p><div class="fix"><b>Fix:</b> Confirm the longest leg goes to the blue (&minus;) rail, and the black wire runs from the Mega's <code>GND</code> to that same rail.</div></div></details>
-        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#128260;</span> Colours look wrong (red shows as blue, etc.)<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>It cycles, but &ldquo;red&rdquo; lights up blue and vice-versa. The colour legs are simply <b>swapped</b> &mdash; the kit's leg order can vary.</p><div class="fix"><b>Fix:</b> Either move the wires so each colour leg meets its named pin, or just swap the pin numbers at the top of the sketch: <code>int rPin = 9, gPin = 10, bPin = 11;</code></div></div></details>
+        <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#128260;</span> Colours look wrong (red shows as blue, etc.)<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>It cycles, but &ldquo;red&rdquo; lights up blue and vice-versa. The colour legs are simply <b>swapped</b> &mdash; the leg order can vary.</p><div class="fix"><b>Fix:</b> Either move the wires so each colour leg meets its named pin, or just swap the pin numbers at the top of the sketch: <code>int rPin = 9, gPin = 10, bPin = 11;</code></div></div></details>
         <details class="tcard"><summary><span class="tsym" aria-hidden="true">&#129514;</span> The monitor is blank or gibberish<span class="plus" aria-hidden="true">+</span></summary><div class="tbody"><p>No text, or random symbols.</p><div class="fix"><b>Fix:</b> The sketch prints at <b>9600 baud</b>, so run <code>.\scripts\monitor.ps1</code> (it defaults to 9600). If you opened another monitor, close it &mdash; only one program can use the port.</div></div></details>
       </div>
     </section>
@@ -603,7 +603,7 @@ for (int v = 0; v &lt;= 255; v++) {
       <div class="finish"><div class="conf" aria-hidden="true">&#127752;</div><h2>You can paint with light now!</h2><p style="margin:0 auto;max-width:54ch;color:var(--ink-soft)">You drove three PWM channels at once, wrote your first <code>showColor()</code> helper with parameters, and mixed red, green and blue into the whole rainbow &mdash; while the serial monitor announced every colour by name. Three numbers, infinite colours. Onward!</p></div>
     </section>
 
-    <footer>Project 9 &middot; RGB LED &middot; Inland / Keyestudio Mega 2560 R3 &middot; works fully offline</footer>
+    <footer>Project 9 &middot; RGB LED &middot; Mega 2560 (ATmega2560) &middot; works fully offline</footer>
   </main>
 </div>
 
@@ -1053,7 +1053,7 @@ for (int v = 0; v &lt;= 255; v++) {
      ============================================================ */
   var SKETCH_TEXT = [
     "/*",
-    " * 11_RGB_LED   (Inland kit Project 9)",
+    " * 11_RGB_LED",
     " * An RGB LED is three LEDs (red, green, blue) in one dome sharing a common",
     " * cathode (-). By PWM-dimming each colour with analogWrite() and mixing them,",
     " * we make any colour. We narrate the current R,G,B mix over Serial so",
